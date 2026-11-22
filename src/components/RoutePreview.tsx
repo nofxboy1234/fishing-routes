@@ -1,4 +1,4 @@
-import type { Coordinate, CoordinateFormat } from '../lib/coordinates'
+import type { Coordinate } from '../lib/coordinates'
 import { formatDd } from '../lib/coordinates'
 import { bearingCardinal, distanceNm, initialBearing } from '../lib/route'
 
@@ -6,8 +6,8 @@ interface RoutePreviewProps {
   start: Coordinate | null
   end: Coordinate | null
   routeName: string
-  startFormat: CoordinateFormat
-  endFormat: CoordinateFormat
+  startFormat: string
+  endFormat: string
 }
 
 interface PlotPoint {
@@ -421,9 +421,9 @@ export default function RoutePreview({
         <div className="chart-stat">
           <span className="chart-stat__label">Input mix</span>
           <strong className="chart-stat__formats">
-            {startFormat.toUpperCase()}
+            {startFormat}
             <span aria-hidden="true">/</span>
-            {endFormat.toUpperCase()}
+            {endFormat}
           </strong>
         </div>
       </div>

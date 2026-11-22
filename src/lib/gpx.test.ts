@@ -2,8 +2,18 @@ import { describe, expect, it } from 'vitest'
 import { buildGpx, escapeXml, gpxFilename } from './gpx'
 
 const route = {
-  start: { lat: -29.9357194, lon: 31.0096464 },
-  end: { lat: -29.960267, lon: 31.0165 },
+  start: {
+    lat: -29.9357194,
+    lon: 31.0096464,
+    latDecimals: 7,
+    lonDecimals: 7,
+  },
+  end: {
+    lat: -29.960267,
+    lon: 31.0165,
+    latDecimals: 6,
+    lonDecimals: 6,
+  },
   routeName: 'Fishing Spot Route',
 }
 
@@ -17,12 +27,33 @@ describe('buildGpx', () => {
   <trk>
     <name>Fishing Spot Route</name>
     <trkseg>
-      <trkpt lat="-29.935719" lon="31.009646"/>
+      <trkpt lat="-29.9357194" lon="31.0096464"/>
       <trkpt lat="-29.960267" lon="31.016500"/>
     </trkseg>
   </trk>
 </gpx>
 `)
+  })
+
+  it('keeps the starting trkpt at the requested default precision', () => {
+    const gpx = buildGpx(route)
+    expect(gpx).toContain(
+      '<trkpt lat="-29.9357194" lon="31.0096464"/>',
+    )
+  })
+
+  it('uses each coordinate precision for the output', () => {
+    const gpx = buildGpx({
+      ...route,
+      start: {
+        lat: -29.9357194,
+        lon: 31.0096464,
+        latDecimals: 9,
+        lonDecimals: 8,
+      },
+    })
+
+    expect(gpx).toContain('<trkpt lat="-29.935719400" lon="31.00964640"/>')
   })
 
   it('trims the route name and escapes XML-sensitive characters', () => {
@@ -31,7 +62,9 @@ describe('buildGpx', () => {
       routeName: '  Rock & Roll <Run> "2026"  ',
     })
 
-    expect(gpx).toContain('<name>Rock &amp; Roll &lt;Run&gt; &quot;2026&quot;</name>')
+    expect(gpx).toContain(
+      '<name>Rock &amp; Roll &lt;Run&gt; &quot;2026&quot;</name>',
+    )
     expect(gpx).not.toContain('Rock & Roll')
   })
 

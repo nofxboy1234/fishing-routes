@@ -1,13 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import RoutePreview from './components/RoutePreview'
 import {
-  formatCoordinate,
   formatDd,
-  parseCoordinate,
   parseWaypoint,
-  type Coordinate,
-  type CoordinateFormat,
   type ParseResult,
+  type RouteCoordinate,
 } from './lib/coordinates'
 import { buildGpx, downloadGpx, gpxFilename } from './lib/gpx'
 import './App.css'
@@ -16,7 +13,6 @@ type WaypointKey = 'start' | 'end'
 type FieldKey = 'lat' | 'lon'
 
 interface WaypointDraft {
-  format: CoordinateFormat
   lat: string
   lon: string
 }
@@ -32,12 +28,10 @@ const ROUTE_NAME_LIMIT = 80
 const SAMPLE_ROUTE = {
   routeName: 'Fishing Spot Route',
   start: {
-    format: 'dd' as CoordinateFormat,
     lat: '-29.9357194',
     lon: '31.0096464',
   },
   end: {
-    format: 'dd' as CoordinateFormat,
     lat: '-29.960267',
     lon: '31.016500',
   },
@@ -50,11 +44,30 @@ function cloneSampleWaypoints(): WaypointDrafts {
   }
 }
 
-function validCoordinate(parsed: Record<FieldKey, ParseResult>): Coordinate | null {
+function validCoordinate(
+  parsed: Record<FieldKey, ParseResult>,
+): RouteCoordinate | null {
   if (parsed.lat.ok && parsed.lon.ok) {
-    return { lat: parsed.lat.value, lon: parsed.lon.value }
+    return {
+      lat: parsed.lat.value,
+      lon: parsed.lon.value,
+      latDecimals: parsed.lat.decimals,
+      lonDecimals: parsed.lon.decimals,
+    }
   }
   return null
+}
+
+function detectedFormatLabel(
+  parsed: Record<FieldKey, ParseResult>,
+): string {
+  if (!parsed.lat.ok || !parsed.lon.ok) {
+    return '—'
+  }
+
+  return parsed.lat.format === parsed.lon.format
+    ? parsed.lat.format.toUpperCase()
+    : 'DD+DDM'
 }
 
 function CompassMark() {
@@ -180,12 +193,8 @@ function App() {
   const copyTimer = useRef<number | null>(null)
 
   const parsed: ParsedWaypoints = {
-    start: parseWaypoint(
-      waypoints.start.lat,
-      waypoints.start.lon,
-      waypoints.start.format,
-    ),
-    end: parseWaypoint(waypoints.end.lat, waypoints.end.lon, waypoints.end.format),
+    start: parseWaypoint(waypoints.start.lat, waypoints.start.lon),
+    end: parseWaypoint(waypoints.end.lat, waypoints.end.lon),
   }
 
   const startCoordinate = validCoordinate(parsed.start)
@@ -226,32 +235,6 @@ function App() {
         [field]: value,
       },
     }))
-    setCopyState('idle')
-  }
-
-  function changeFormat(waypoint: WaypointKey, nextFormat: CoordinateFormat) {
-    setWaypoints((current) => {
-      const draft = current[waypoint]
-      if (draft.format === nextFormat) {
-        return current
-      }
-
-      const lat = parseCoordinate(draft.lat, 'lat', draft.format)
-      const lon = parseCoordinate(draft.lon, 'lon', draft.format)
-
-      return {
-        ...current,
-        [waypoint]: {
-          format: nextFormat,
-          lat: lat.ok
-            ? formatCoordinate(lat.value, 'lat', nextFormat)
-            : draft.lat,
-          lon: lon.ok
-            ? formatCoordinate(lon.value, 'lon', nextFormat)
-            : draft.lon,
-        },
-      }
-    })
     setCopyState('idle')
   }
 
@@ -298,10 +281,13 @@ function App() {
   }
 
   function renderConversion(waypoint: WaypointKey) {
-    const coordinate = validCoordinate(parsed[waypoint])
+    const latitude = parsed[waypoint].lat
+    const longitude = parsed[waypoint].lon
+    const ready = latitude.ok && longitude.ok
+
     return (
       <div
-        className={`conversion ${coordinate ? 'conversion--ready' : ''}`}
+        className={`conversion ${ready ? 'conversion--ready' : ''}`}
         aria-live="polite"
       >
         <span className="conversion__label">
@@ -309,11 +295,11 @@ function App() {
           Standard DD
         </span>
         <span className="conversion__value">
-          {coordinate ? (
+          {latitude.ok && longitude.ok ? (
             <>
-              {formatDd(coordinate.lat)}
+              {formatDd(latitude.value, latitude.decimals)}
               <span className="conversion__divider"> / </span>
-              {formatDd(coordinate.lon)}
+              {formatDd(longitude.value, longitude.decimals)}
             </>
           ) : (
             '— / —'
@@ -357,13 +343,13 @@ function App() {
           </div>
           <div className="intro__aside">
             <p>
-              Turn two marks into an import-ready GPX route. Enter decimal
-              degrees or degrees and decimal minutes—mix the two if you like.
-              We’ll convert, plot, and package the file.
+              Turn two marks into an import-ready GPX route. Type decimal
+              degrees or degrees and decimal minutes into any field—Tideline
+              detects the format, converts, plots, and packages the file.
             </p>
             <div className="intro__tags" aria-label="Supported input features">
+              <span>Auto-detect</span>
               <span>DD + DDM</span>
-              <span>Mixed inputs</span>
               <span>No upload</span>
             </div>
           </div>
@@ -427,15 +413,13 @@ function App() {
               const isStart = waypoint === 'start'
               const heading = isStart ? 'Start waypoint' : 'End waypoint'
               const message =
-                draft.format === 'dd'
-                  ? 'Signed decimal degrees. Use a minus for south or west.'
-                  : 'Degrees and decimal minutes with N/S or E/W. A leading minus also works.'
-              const latitudePlaceholder =
-                draft.format === 'dd' ? '-29.935719' : '29° 56.1432′ S'
-              const longitudePlaceholder =
-                draft.format === 'dd' ? '31.009646' : '31° 00.5788′ E'
+                'DD or DDM is detected automatically. South and west can be signed with a minus, or written with N/S/E/W.'
+              const latitudePlaceholder = '-29.9357194'
+              const longitudePlaceholder = '31.0096464'
               const latError = fieldError(waypoint, 'lat')
               const lonError = fieldError(waypoint, 'lon')
+              const latFormat = parsed[waypoint].lat
+              const lonFormat = parsed[waypoint].lon
               const latHintId = `${waypoint}-lat-hint`
               const lonHintId = `${waypoint}-lon-hint`
 
@@ -461,38 +445,25 @@ function App() {
                       </div>
                     </div>
 
-                    <div
-                      className="format-toggle"
-                      role="group"
-                      aria-label={`${heading} coordinate format`}
+                    <span
+                      className="auto-badge"
+                      title="Coordinate formats are detected automatically"
                     >
-                      {(['dd', 'ddm'] as const).map((format) => (
-                        <button
-                          key={format}
-                          type="button"
-                          className={
-                            draft.format === format ? 'is-active' : undefined
-                          }
-                          aria-pressed={draft.format === format}
-                          onClick={() => changeFormat(waypoint, format)}
-                          title={
-                            format === 'dd'
-                              ? 'Decimal degrees'
-                              : 'Degrees and decimal minutes'
-                          }
-                        >
-                          {format.toUpperCase()}
-                        </button>
-                      ))}
-                    </div>
+                      <span className="auto-badge__dot" aria-hidden="true" />
+                      Auto-detect
+                    </span>
                   </div>
 
                   <div className="coordinate-grid">
                     <div className="field">
                       <div className="field__topline">
                         <label htmlFor={`${waypoint}-lat`}>Latitude</label>
-                        <span className="field__meta">
-                          {draft.format === 'dd' ? 'decimal' : 'deg + min'}
+                        <span
+                          className={`field__meta${latFormat.ok ? ' field__meta--detected' : ''}`}
+                        >
+                          {latFormat.ok
+                            ? latFormat.format.toUpperCase()
+                            : 'DD or DDM'}
                         </span>
                       </div>
                       <input
@@ -512,7 +483,8 @@ function App() {
                         aria-describedby={`${latHintId}${latError ? ` ${waypoint}-lat-error` : ''}`}
                       />
                       <p className="sr-only" id={latHintId}>
-                        Latitude in {draft.format.toUpperCase()} format. {message}
+                        Latitude. Enter DD (for example -29.9357194) or DDM (for
+                        example 29° 56.1432′ S). {message}
                       </p>
                       {latError && (
                         <p
@@ -528,8 +500,12 @@ function App() {
                     <div className="field">
                       <div className="field__topline">
                         <label htmlFor={`${waypoint}-lon`}>Longitude</label>
-                        <span className="field__meta">
-                          {draft.format === 'dd' ? 'decimal' : 'deg + min'}
+                        <span
+                          className={`field__meta${lonFormat.ok ? ' field__meta--detected' : ''}`}
+                        >
+                          {lonFormat.ok
+                            ? lonFormat.format.toUpperCase()
+                            : 'DD or DDM'}
                         </span>
                       </div>
                       <input
@@ -549,7 +525,8 @@ function App() {
                         aria-describedby={`${lonHintId}${lonError ? ` ${waypoint}-lon-error` : ''}`}
                       />
                       <p className="sr-only" id={lonHintId}>
-                        Longitude in {draft.format.toUpperCase()} format. {message}
+                        Longitude. Enter DD (for example 31.0096464) or DDM (for
+                        example 31° 00.5788′ E). {message}
                       </p>
                       {lonError && (
                         <p
@@ -586,7 +563,7 @@ function App() {
                   </strong>
                   <span>
                     {canExport
-                      ? 'GPX 1.1 · six-decimal coordinates'
+                      ? 'GPX 1.1 · precision preserved'
                       : 'Check both waypoints to unlock export.'}
                   </span>
                 </div>
@@ -607,8 +584,8 @@ function App() {
               start={startCoordinate}
               end={endCoordinate}
               routeName={routeName}
-              startFormat={waypoints.start.format}
-              endFormat={waypoints.end.format}
+              startFormat={detectedFormatLabel(parsed.start)}
+              endFormat={detectedFormatLabel(parsed.end)}
             />
 
             <section className="gpx-panel" aria-labelledby="gpx-title">
@@ -651,8 +628,8 @@ function App() {
                 </pre>
               </div>
               <p className="gpx-note">
-                Converted coordinates are written as standard decimal degrees
-                with six decimal places.
+                Coordinates are written as standard decimal degrees with at
+                least six decimal places. Extra input precision is preserved.
               </p>
             </section>
           </aside>

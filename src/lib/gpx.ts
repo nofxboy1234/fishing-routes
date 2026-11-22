@@ -1,8 +1,8 @@
-import { formatDd, type Coordinate } from './coordinates'
+import { formatDd, type RouteCoordinate } from './coordinates'
 
 export interface GpxInput {
-  start: Coordinate
-  end: Coordinate
+  start: RouteCoordinate
+  end: RouteCoordinate
   routeName: string
 }
 
@@ -41,10 +41,10 @@ export function escapeXml(value: string): string {
  */
 export function buildGpx({ start, end, routeName }: GpxInput): string {
   const name = escapeXml(routeName.trim())
-  const startLat = formatDd(start.lat)
-  const startLon = formatDd(start.lon)
-  const endLat = formatDd(end.lat)
-  const endLon = formatDd(end.lon)
+  const startLat = formatDd(start.lat, start.latDecimals)
+  const startLon = formatDd(start.lon, start.lonDecimals)
+  const endLat = formatDd(end.lat, end.latDecimals)
+  const endLon = formatDd(end.lon, end.lonDecimals)
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="Custom Apexmove Route">

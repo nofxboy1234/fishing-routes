@@ -6,8 +6,18 @@ export interface Coordinate {
   lon: number
 }
 
+export interface RouteCoordinate extends Coordinate {
+  latDecimals: number
+  lonDecimals: number
+}
+
 export type ParseResult =
-  | { ok: true; value: number }
+  | {
+      ok: true
+      value: number
+      format: CoordinateFormat
+      decimals: number
+    }
   | { ok: false; error: string }
 
 const AXIS_CONFIG = {
@@ -29,6 +39,8 @@ const AXIS_CONFIG = {
 
 const DECIMAL_RE = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/
 const NUMBER_RE = /^(?:\d+(?:\.\d*)?|\.\d+)$/
+const MIN_DECIMALS = 6
+const MAX_DECIMALS = 9
 
 function fail(message: string): ParseResult {
   return { ok: false, error: message }
@@ -38,7 +50,21 @@ function normalizeZero(value: number): number {
   return Object.is(value, -0) ? 0 : value
 }
 
-function validateRange(value: number, axis: Axis): ParseResult {
+function clampDecimals(decimals: number): number {
+  return Math.min(MAX_DECIMALS, Math.max(MIN_DECIMALS, decimals))
+}
+
+function countDecimalPlaces(value: string): number {
+  const fraction = value.split('.')[1]
+  return fraction ? fraction.length : 0
+}
+
+function validateRange(
+  value: number,
+  axis: Axis,
+  format: CoordinateFormat,
+  decimals: number,
+): ParseResult {
   const config = AXIS_CONFIG[axis]
   if (!Number.isFinite(value)) {
     return fail(`Enter a valid ${config.label.toLowerCase()}.`)
@@ -50,14 +76,19 @@ function validateRange(value: number, axis: Axis): ParseResult {
     )
   }
 
-  return { ok: true, value: normalizeZero(value) }
+  return {
+    ok: true,
+    value: normalizeZero(value),
+    format,
+    decimals: clampDecimals(decimals),
+  }
 }
 
-export function parseCoordinate(
-  raw: string,
-  axis: Axis,
-  format: CoordinateFormat,
-): ParseResult {
+/**
+ * Parses a coordinate without asking for a format. A lone signed decimal
+ * number is read as DD; everything else is treated as DDM.
+ */
+export function parseCoordinate(raw: string, axis: Axis): ParseResult {
   const config = AXIS_CONFIG[axis]
   const text = raw.trim()
 
@@ -65,15 +96,14 @@ export function parseCoordinate(
     return fail(`Enter a ${config.label.toLowerCase()}.`)
   }
 
-  if (format === 'dd') {
-    const normalized = text.replace(',', '.')
-    if (!DECIMAL_RE.test(normalized)) {
-      return fail(
-        `Use decimal degrees, like ${config.ddExample} (not degrees and minutes).`,
-      )
-    }
-
-    return validateRange(Number(normalized), axis)
+  const normalized = text.replace(',', '.')
+  if (DECIMAL_RE.test(normalized)) {
+    return validateRange(
+      Number(normalized),
+      axis,
+      'dd',
+      Math.max(MIN_DECIMALS, countDecimalPlaces(normalized)),
+    )
   }
 
   return parseDdm(text, axis)
@@ -118,14 +148,14 @@ function parseDdm(raw: string, axis: Axis): ParseResult {
   const parts = normalized.split(/\s+/)
   if (parts.length !== 2) {
     return fail(
-      `Enter degrees and decimal minutes, like ${config.ddmExample}.`,
+      `Enter DD or DDM coordinates, like ${config.ddExample} or ${config.ddmExample}.`,
     )
   }
 
   const [degreePart, minutePart] = parts
   if (!NUMBER_RE.test(degreePart) || !NUMBER_RE.test(minutePart)) {
     return fail(
-      `Enter degrees and decimal minutes, like ${config.ddmExample}.`,
+      `Enter DD or DDM coordinates, like ${config.ddExample} or ${config.ddmExample}.`,
     )
   }
 
@@ -166,58 +196,25 @@ function parseDdm(raw: string, axis: Axis): ParseResult {
   return {
     ok: true,
     value: normalizeZero(negative ? -value : value),
+    format: 'ddm',
+    decimals: clampDecimals(6 + Math.max(0, countDecimalPlaces(minutePart) - 4)),
   }
 }
 
 /**
- * Converts a decimal degree value into a fixable, standard DD string.
- * GPX coordinates are emitted at six decimal places.
+ * Formats a decimal degree value as standard DD. Six decimals is the minimum
+ * and precision from the input is preserved up to nine decimals.
  */
-export function formatDd(value: number): string {
-  return normalizeZero(value).toFixed(6)
-}
-
-/**
- * Formats a decimal degree value as degrees and decimal minutes, including
- * the hemisphere. This is used when someone switches a waypoint to DDM.
- */
-export function formatDdm(value: number, axis: Axis): string {
-  const absolute = Math.abs(value)
-  let degrees = Math.floor(absolute)
-  let minutes = Math.round((absolute - degrees) * 60 * 10_000) / 10_000
-
-  if (minutes >= 60) {
-    degrees += 1
-    minutes = 0
-  }
-
-  const hemisphere =
-    axis === 'lat'
-      ? value < 0
-        ? 'S'
-        : 'N'
-      : value < 0
-        ? 'W'
-        : 'E'
-
-  return `${degrees}° ${minutes.toFixed(4).padStart(7, '0')}′ ${hemisphere}`
-}
-
-export function formatCoordinate(
-  value: number,
-  axis: Axis,
-  format: CoordinateFormat,
-): string {
-  return format === 'dd' ? formatDd(value) : formatDdm(value, axis)
+export function formatDd(value: number, decimals = MIN_DECIMALS): string {
+  return normalizeZero(value).toFixed(clampDecimals(decimals))
 }
 
 export function parseWaypoint(
   latInput: string,
   lonInput: string,
-  format: CoordinateFormat,
 ): { lat: ParseResult; lon: ParseResult } {
   return {
-    lat: parseCoordinate(latInput, 'lat', format),
-    lon: parseCoordinate(lonInput, 'lon', format),
+    lat: parseCoordinate(latInput, 'lat'),
+    lon: parseCoordinate(lonInput, 'lon'),
   }
 }
