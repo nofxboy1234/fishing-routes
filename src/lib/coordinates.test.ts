@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   formatDd,
   parseCoordinate,
+  parseCoordinatePair,
   parseWaypoint,
   type ParseResult,
 } from './coordinates'
@@ -156,5 +157,37 @@ describe('coordinate formatting', () => {
     expect(formatDd(-29.9357194, 7)).toBe('-29.9357194')
     expect(formatDd(31.0096464, 9)).toBe('31.009646400')
     expect(formatDd(1.2345678912, 12)).toBe('1.234567891')
+  })
+})
+
+describe('parseCoordinatePair', () => {
+  it('splits a pasted latitude and longitude pair', () => {
+    expect(parseCoordinatePair('-29.865207, 31.064148')).toEqual({
+      lat: '-29.865207',
+      lon: '31.064148',
+    })
+  })
+
+  it('handles surrounding parentheses and extra whitespace', () => {
+    expect(parseCoordinatePair('  (-29.865207, 31.064148)  ')).toEqual({
+      lat: '-29.865207',
+      lon: '31.064148',
+    })
+  })
+
+  it('supports mixed DD and DDM sides', () => {
+    expect(
+      parseCoordinatePair('-29.865207, 31° 03.8489′ E'),
+    ).toEqual({
+      lat: '-29.865207',
+      lon: '31° 03.8489′ E',
+    })
+  })
+
+  it('rejects a single coordinate or an invalid pair', () => {
+    expect(parseCoordinatePair('-29.865207')).toBeNull()
+    expect(parseCoordinatePair('-29.865207, 999')).toBeNull()
+    expect(parseCoordinatePair('north, east')).toBeNull()
+    expect(parseCoordinatePair('-29.865207,')).toBeNull()
   })
 })

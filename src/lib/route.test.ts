@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { bearingCardinal, distanceNm, initialBearing } from './route'
+import { bearingCardinal, distanceKm, initialBearing } from './route'
 
 const start = { lat: -29.9357194, lon: 31.0096464 }
 const end = { lat: -29.960267, lon: 31.0165 }
 
 describe('route metrics', () => {
-  it('calculates the haversine distance in nautical miles', () => {
-    expect(distanceNm(start, end)).toBeCloseTo(1.5164, 3)
+  it('calculates the haversine distance in kilometres', () => {
+    expect(distanceKm(start, end)).toBeCloseTo(2.8083, 3)
   })
 
   it('calculates the initial bearing', () => {
@@ -22,6 +22,6 @@ describe('route metrics', () => {
   })
 
   it('returns zero distance for identical points', () => {
-    expect(distanceNm(start, start)).toBe(0)
+    expect(distanceKm(start, start)).toBe(0)
   })
 })

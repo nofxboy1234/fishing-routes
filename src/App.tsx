@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useState, type ClipboardEvent, type FormEvent } from 'react'
 import RoutePreview from './components/RoutePreview'
 import {
   formatDd,
+  parseCoordinatePair,
   parseWaypoint,
   type ParseResult,
   type RouteCoordinate,
@@ -104,45 +105,6 @@ function DownloadIcon() {
   )
 }
 
-function CopyIcon({ copied }: { copied: boolean }) {
-  if (copied) {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path
-          d="m5 12.5 4.2 4.2L19 7"
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="1.8"
-        />
-      </svg>
-    )
-  }
-
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <rect
-        x="8"
-        y="8"
-        width="11"
-        height="12"
-        rx="2"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-      />
-      <path
-        d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.6"
-      />
-    </svg>
-  )
-}
-
 function ResetIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -187,11 +149,6 @@ function App() {
   const [waypoints, setWaypoints] = useState<WaypointDrafts>(
     cloneSampleWaypoints,
   )
-  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>(
-    'idle',
-  )
-  const copyTimer = useRef<number | null>(null)
-
   const parsed: ParsedWaypoints = {
     start: parseWaypoint(waypoints.start.lat, waypoints.start.lon),
     end: parseWaypoint(waypoints.end.lat, waypoints.end.lon),
@@ -204,7 +161,7 @@ function App() {
     trimmedRouteName.length === 0 ? 'Give this route a name.' : null
   const canExport = Boolean(startCoordinate && endCoordinate && !nameError)
 
-  const previewGpx =
+  const gpxContent =
     canExport && startCoordinate && endCoordinate
       ? buildGpx({
           start: startCoordinate,
@@ -214,14 +171,6 @@ function App() {
       : ''
 
   const filename = gpxFilename(trimmedRouteName || 'fishing-route')
-
-  useEffect(() => {
-    return () => {
-      if (copyTimer.current !== null) {
-        window.clearTimeout(copyTimer.current)
-      }
-    }
-  }, [])
 
   function updateWaypoint(
     waypoint: WaypointKey,
@@ -235,7 +184,22 @@ function App() {
         [field]: value,
       },
     }))
-    setCopyState('idle')
+  }
+
+  function handleCoordinatePaste(
+    event: ClipboardEvent<HTMLInputElement>,
+    waypoint: WaypointKey,
+  ) {
+    const pair = parseCoordinatePair(event.clipboardData.getData('text'))
+    if (!pair) {
+      return
+    }
+
+    event.preventDefault()
+    setWaypoints((current) => ({
+      ...current,
+      [waypoint]: pair,
+    }))
   }
 
   function fieldError(
@@ -249,35 +213,16 @@ function App() {
   function resetSample() {
     setRouteName(SAMPLE_ROUTE.routeName)
     setWaypoints(cloneSampleWaypoints())
-    setCopyState('idle')
   }
 
   function handleDownload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (!canExport || !startCoordinate || !endCoordinate || !previewGpx) {
+    if (!canExport || !startCoordinate || !endCoordinate || !gpxContent) {
       return
     }
 
-    downloadGpx(previewGpx, filename)
-  }
-
-  async function handleCopy() {
-    if (!previewGpx) {
-      return
-    }
-
-    try {
-      await navigator.clipboard.writeText(previewGpx)
-      setCopyState('copied')
-    } catch {
-      setCopyState('failed')
-    }
-
-    if (copyTimer.current !== null) {
-      window.clearTimeout(copyTimer.current)
-    }
-    copyTimer.current = window.setTimeout(() => setCopyState('idle'), 2000)
+    downloadGpx(gpxContent, filename)
   }
 
   function renderConversion(waypoint: WaypointKey) {
@@ -392,7 +337,6 @@ function App() {
                 value={routeName}
                 onChange={(event) => {
                   setRouteName(event.target.value)
-                  setCopyState('idle')
                 }}
                 maxLength={ROUTE_NAME_LIMIT}
                 placeholder="Fishing Spot Route"
@@ -413,7 +357,7 @@ function App() {
               const isStart = waypoint === 'start'
               const heading = isStart ? 'Start waypoint' : 'End waypoint'
               const message =
-                'DD or DDM is detected automatically. South and west can be signed with a minus, or written with N/S/E/W.'
+                'DD or DDM is detected automatically. Paste a pair like -29.865207, 31.064148 into either field to fill both.'
               const latitudePlaceholder = '-29.9357194'
               const longitudePlaceholder = '31.0096464'
               const latError = fieldError(waypoint, 'lat')
@@ -475,6 +419,9 @@ function App() {
                         onChange={(event) =>
                           updateWaypoint(waypoint, 'lat', event.target.value)
                         }
+                        onPaste={(event) =>
+                          handleCoordinatePaste(event, waypoint)
+                        }
                         placeholder={latitudePlaceholder}
                         autoComplete="off"
                         spellCheck={false}
@@ -516,6 +463,9 @@ function App() {
                         value={draft.lon}
                         onChange={(event) =>
                           updateWaypoint(waypoint, 'lon', event.target.value)
+                        }
+                        onPaste={(event) =>
+                          handleCoordinatePaste(event, waypoint)
                         }
                         placeholder={longitudePlaceholder}
                         autoComplete="off"
@@ -579,7 +529,7 @@ function App() {
             </div>
           </form>
 
-          <aside className="preview-column" aria-label="Route preview and file">
+          <aside className="preview-column" aria-label="Route preview">
             <RoutePreview
               start={startCoordinate}
               end={endCoordinate}
@@ -587,51 +537,6 @@ function App() {
               startFormat={detectedFormatLabel(parsed.start)}
               endFormat={detectedFormatLabel(parsed.end)}
             />
-
-            <section className="gpx-panel" aria-labelledby="gpx-title">
-              <div className="panel-heading panel-heading--compact">
-                <div>
-                  <p className="kicker">
-                    <span className="kicker__step">02</span>
-                    File preview
-                  </p>
-                  <h2 id="gpx-title">Ready to import</h2>
-                </div>
-                <button
-                  type="button"
-                  className={`copy-button ${copyState === 'copied' ? 'is-copied' : ''}`}
-                  onClick={handleCopy}
-                  disabled={!previewGpx}
-                >
-                  <CopyIcon copied={copyState === 'copied'} />
-                  {copyState === 'copied'
-                    ? 'Copied'
-                    : copyState === 'failed'
-                      ? 'Try again'
-                      : 'Copy GPX'}
-                </button>
-              </div>
-
-              <div className="code-frame">
-                <div className="code-toolbar" aria-hidden="true">
-                  <span className="code-filename">
-                    <span className="code-filename__dot" />
-                    {filename}
-                  </span>
-                  <span>GPX · UTF-8</span>
-                </div>
-                <pre className="code-block" aria-label="GPX file preview">
-                  <code>
-                    {previewGpx ||
-                      'Add valid start and end coordinates to build the GPX preview.'}
-                  </code>
-                </pre>
-              </div>
-              <p className="gpx-note">
-                Coordinates are written as standard decimal degrees with at
-                least six decimal places. Extra input precision is preserved.
-              </p>
-            </section>
           </aside>
         </div>
       </main>

@@ -1,6 +1,6 @@
 import type { Coordinate } from '../lib/coordinates'
 import { formatDd } from '../lib/coordinates'
-import { bearingCardinal, distanceNm, initialBearing } from '../lib/route'
+import { bearingCardinal, distanceKm, initialBearing } from '../lib/route'
 
 interface RoutePreviewProps {
   start: Coordinate | null
@@ -192,7 +192,7 @@ export default function RoutePreview({
 }: RoutePreviewProps) {
   const hasRoute = Boolean(start && end)
   const points = start && end ? projectRoute(start, end) : null
-  const distance = start && end ? distanceNm(start, end) : null
+  const distance = start && end ? distanceKm(start, end) : null
   const bearing = start && end ? initialBearing(start, end) : null
   const displayName = routeName.trim() || 'Untitled route'
 
@@ -314,7 +314,7 @@ export default function RoutePreview({
               0
             </text>
             <text x="128" y="332" textAnchor="end">
-              2 nm
+              2 km
             </text>
           </g>
 
@@ -409,7 +409,7 @@ export default function RoutePreview({
           <span className="chart-stat__label">Distance</span>
           <strong>
             {distance === null ? '—' : distance.toFixed(1)}
-            <small>nm</small>
+            <small>km</small>
           </strong>
         </div>
         <div className="chart-stat">

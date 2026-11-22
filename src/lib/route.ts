@@ -1,7 +1,6 @@
 import type { Coordinate } from './coordinates'
 
 const EARTH_RADIUS_KM = 6371.0088
-export const KM_PER_NAUTICAL_MILE = 1.852
 
 const CARDINALS = [
   'N',
@@ -26,7 +25,7 @@ function toRadians(degrees: number): number {
   return (degrees * Math.PI) / 180
 }
 
-export function distanceNm(from: Coordinate, to: Coordinate): number {
+export function distanceKm(from: Coordinate, to: Coordinate): number {
   const lat1 = toRadians(from.lat)
   const lat2 = toRadians(to.lat)
   const deltaLat = toRadians(to.lat - from.lat)
@@ -37,9 +36,8 @@ export function distanceNm(from: Coordinate, to: Coordinate): number {
     Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLon / 2) ** 2
 
   const centralAngle = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  const distanceKm = EARTH_RADIUS_KM * centralAngle
 
-  return distanceKm / KM_PER_NAUTICAL_MILE
+  return EARTH_RADIUS_KM * centralAngle
 }
 
 export function initialBearing(from: Coordinate, to: Coordinate): number {

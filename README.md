@@ -38,6 +38,10 @@ DDM also accepts a leading hemisphere (`S 29 56.1432`), signed degrees
 (`-29 56.1432`), or compact notation (`29°56.1432′S`). South and west
 coordinates are always converted to negative decimal degrees.
 
+To fill both fields at once, paste a latitude/longitude pair such as
+`-29.865207, 31.064148` into either the latitude or longitude field. Parentheses
+and DDM pairs are supported too.
+
 Both values are validated against their geographic range and normalized to
 standard decimal degrees. Six decimal places are used as the minimum output
 precision, and extra precision from the input is preserved—for example, the

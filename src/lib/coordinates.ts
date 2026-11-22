@@ -218,3 +218,35 @@ export function parseWaypoint(
     lon: parseCoordinate(lonInput, 'lon'),
   }
 }
+
+/**
+ * Splits a pasted coordinate pair such as "-29.865207, 31.064148" into the
+ * two raw field values. Returns null when the text is not a valid pair, so a
+ * normal paste can continue unchanged.
+ */
+export function parseCoordinatePair(
+  raw: string,
+): { lat: string; lon: string } | null {
+  const text = raw.trim().replace(/^\(\s*/, '').replace(/\s*\)$/, '')
+  const parts = text.split(',')
+
+  if (parts.length !== 2) {
+    return null
+  }
+
+  const latitude = parts[0].trim()
+  const longitude = parts[1].trim()
+
+  if (!latitude || !longitude) {
+    return null
+  }
+
+  if (
+    !parseCoordinate(latitude, 'lat').ok ||
+    !parseCoordinate(longitude, 'lon').ok
+  ) {
+    return null
+  }
+
+  return { lat: latitude, lon: longitude }
+}
