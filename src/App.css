@@ -86,7 +86,7 @@
   padding: 7px 11px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 239, 196, 0.38);
   color: var(--muted);
   font-family: var(--font-mono);
   font-size: 8px;
@@ -135,7 +135,7 @@ main {
 }
 
 .kicker__line--light {
-  background: var(--sage);
+  background: var(--sky);
 }
 
 .kicker__step {
@@ -166,7 +166,7 @@ main {
 .intro h1 em {
   display: block;
   padding-left: clamp(12px, 4.2vw, 56px);
-  color: var(--coral-strong);
+  color: var(--deep);
   font-weight: 300;
   font-style: italic;
   letter-spacing: -0.048em;
@@ -197,7 +197,7 @@ main {
   padding: 6px 9px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 239, 196, 0.38);
   color: var(--ink-soft);
   font-family: var(--font-mono);
   font-size: 8px;
@@ -222,8 +222,8 @@ main {
   border-radius: 17px;
   background: var(--panel);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.65) inset,
-    0 26px 70px -50px rgba(22, 51, 45, 0.5);
+    0 1px 0 rgba(255, 252, 238, 0.7) inset,
+    0 26px 70px -50px rgba(6, 74, 103, 0.38);
   animation: rise-in 0.55s ease-out both;
 }
 
@@ -271,7 +271,7 @@ main {
 
 .text-button:hover {
   border-color: var(--line);
-  background: rgba(255, 255, 255, 0.42);
+  background: rgba(255, 239, 196, 0.52);
   color: var(--ink);
 }
 
@@ -332,7 +332,7 @@ main {
   border: 1px solid var(--line-strong);
   border-radius: 8px;
   outline: none;
-  background: #fcf9f1;
+  background: #fff8df;
   color: var(--ink);
   font-family: var(--font-mono);
   font-size: 12px;
@@ -345,27 +345,27 @@ main {
 }
 
 .field input::placeholder {
-  color: #a9a394;
+  color: #5b8194;
   opacity: 1;
 }
 
 .field input:hover {
-  border-color: #a49b87;
+  border-color: var(--mid);
 }
 
 .field input:focus {
   border-color: var(--ink);
-  background: #fffdf7;
-  box-shadow: 0 0 0 3px rgba(22, 51, 45, 0.09);
+  background: #fff9e7;
+  box-shadow: 0 0 0 3px rgba(8, 98, 136, 0.13);
 }
 
 .field input[aria-invalid='true'] {
   border-color: var(--danger);
-  background: #fff8f3;
+  background: #fff6e4;
 }
 
 .field input[aria-invalid='true']:focus {
-  box-shadow: 0 0 0 3px rgba(178, 63, 42, 0.1);
+  box-shadow: 0 0 0 3px rgba(148, 57, 41, 0.12);
 }
 
 .field-error {
@@ -423,20 +423,22 @@ main {
   place-items: center;
   flex: 0 0 auto;
   border-radius: 50%;
-  color: #15352f;
+  color: var(--deep);
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 750;
   line-height: 1;
-  box-shadow: 0 0 0 1px rgba(22, 51, 45, 0.13) inset;
+  box-shadow: 0 0 0 1px rgba(8, 98, 136, 0.16) inset;
 }
 
 .waypoint-marker--start {
-  background: var(--coral);
+  background: var(--deep);
+  color: var(--cream);
 }
 
 .waypoint-marker--end {
-  background: var(--sun);
+  background: var(--sky);
+  color: var(--deep);
 }
 
 .waypoint-index {
@@ -465,9 +467,9 @@ main {
   gap: 5px;
   flex: 0 0 auto;
   padding: 5px 8px;
-  border: 1px solid rgba(22, 51, 45, 0.1);
+  border: 1px solid rgba(8, 98, 136, 0.18);
   border-radius: 999px;
-  background: #eae3d4;
+  background: rgba(151, 215, 255, 0.4);
   color: var(--muted);
   font-family: var(--font-mono);
   font-size: 7px;
@@ -483,7 +485,7 @@ main {
   height: 5px;
   border-radius: 50%;
   background: var(--success);
-  box-shadow: 0 0 0 3px rgba(45, 123, 96, 0.08);
+  box-shadow: 0 0 0 3px rgba(8, 98, 136, 0.1);
 }
 
 .coordinate-grid {
@@ -496,8 +498,8 @@ main {
 .waypoint-card .field input {
   height: 43px;
   padding: 0 11px;
-  border-color: #cdc5b3;
-  background: #f9f5eb;
+  border-color: var(--line-strong);
+  background: #fff5d9;
   font-size: 11px;
 }
 
@@ -508,13 +510,13 @@ main {
   align-items: flex-end;
   justify-content: space-between;
   gap: 12px;
-  border-top: 1px dashed #d3cbbb;
+  border-top: 1px dashed var(--line);
 }
 
 .waypoint-hint {
   max-width: 280px;
   margin: 0;
-  color: #77847c;
+  color: var(--muted);
   font-size: 9.5px;
   font-weight: 480;
   line-height: 1.5;
@@ -522,7 +524,7 @@ main {
 
 .waypoint-hint span {
   margin-right: 4px;
-  color: var(--coral-strong);
+  color: var(--deep);
   font-size: 11px;
 }
 
@@ -555,13 +557,13 @@ main {
 
 .conversion--ready .conversion__dot {
   background: var(--success);
-  box-shadow: 0 0 0 3px rgba(45, 123, 96, 0.1);
+  box-shadow: 0 0 0 3px rgba(8, 98, 136, 0.1);
 }
 
 .conversion__value {
   padding: 4px 6px;
   border-radius: 4px;
-  background: rgba(22, 51, 45, 0.045);
+  background: rgba(8, 98, 136, 0.07);
   color: var(--ink);
   font-family: var(--font-mono);
   font-size: 9px;
@@ -588,11 +590,11 @@ main {
   background:
     radial-gradient(
       circle at 2% 0%,
-      rgba(84, 137, 117, 0.3),
+      rgba(77, 141, 186, 0.55),
       transparent 15rem
     ),
     var(--deep);
-  box-shadow: 0 16px 35px -30px rgba(9, 45, 41, 0.9);
+  box-shadow: 0 16px 35px -30px rgba(4, 50, 70, 0.45);
 }
 
 .export-status {
@@ -607,13 +609,13 @@ main {
   height: 7px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: #7b8981;
-  box-shadow: 0 0 0 4px rgba(191, 214, 201, 0.08);
+  background: rgba(255, 239, 196, 0.4);
+  box-shadow: 0 0 0 4px rgba(255, 239, 196, 0.08);
 }
 
 .status-dot--ready {
-  background: #7dcc9e;
-  box-shadow: 0 0 0 4px rgba(125, 204, 158, 0.11);
+  background: var(--sky);
+  box-shadow: 0 0 0 4px rgba(151, 215, 255, 0.14);
 }
 
 .export-status div {
@@ -632,7 +634,7 @@ main {
 }
 
 .export-status span:last-child {
-  color: #90a99b;
+  color: var(--cream);
   font-family: var(--font-mono);
   font-size: 7.5px;
   line-height: 1.35;
@@ -649,8 +651,8 @@ main {
   flex: 0 0 auto;
   border: 0;
   border-radius: 8px;
-  background: var(--coral);
-  color: #18302a;
+  background: var(--cream);
+  color: var(--deep);
   font-size: 11px;
   font-weight: 750;
   line-height: 1;
@@ -668,10 +670,10 @@ main {
 }
 
 .download-button:hover:not(:disabled) {
-  background: #fb8564;
+  background: var(--sky);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.25) inset,
-    0 8px 18px -12px rgba(239, 114, 80, 0.8);
+    0 1px 0 rgba(255, 255, 255, 0.3) inset,
+    0 8px 18px -12px rgba(151, 215, 255, 0.5);
   transform: translateY(-1px);
 }
 
@@ -680,9 +682,13 @@ main {
 }
 
 .download-button:disabled {
-  background: #34534c;
-  color: #94a89d;
+  background: rgba(255, 239, 196, 0.16);
+  color: rgba(255, 239, 196, 0.48);
   box-shadow: none;
+}
+
+.export-zone :focus-visible {
+  outline-color: var(--sky);
 }
 
 /* ---------- Preview column ---------- */
@@ -696,12 +702,12 @@ main {
 
 .chart-card {
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 239, 196, 0.16);
   border-radius: 17px;
   background: var(--deep);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.07) inset,
-    0 30px 75px -50px rgba(9, 45, 41, 0.85);
+    0 1px 0 rgba(255, 239, 196, 0.1) inset,
+    0 30px 75px -50px rgba(4, 50, 70, 0.5);
   animation: rise-in 0.6s 0.08s ease-out both;
 }
 
@@ -714,7 +720,7 @@ main {
 }
 
 .chart-card .kicker {
-  color: var(--sage);
+  color: var(--cream);
 }
 
 .chart-card__header h2 {
@@ -735,10 +741,10 @@ main {
   flex: 0 0 auto;
   margin-top: 2px;
   padding: 5px 8px;
-  border: 1px solid rgba(188, 213, 197, 0.2);
+  border: 1px solid rgba(151, 215, 255, 0.28);
   border-radius: 999px;
-  color: var(--sage);
-  background: rgba(255, 255, 255, 0.035);
+  color: var(--cream);
+  background: rgba(255, 239, 196, 0.05);
   font-family: var(--font-mono);
   font-size: 7.5px;
   font-weight: 500;
@@ -751,16 +757,16 @@ main {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #7dcc9e;
-  box-shadow: 0 0 0 3px rgba(125, 204, 158, 0.1);
+  background: var(--sky);
+  box-shadow: 0 0 0 3px rgba(151, 215, 255, 0.14);
 }
 
 .chart-canvas {
   margin: 0 11px;
   overflow: hidden;
-  border: 1px solid rgba(225, 239, 228, 0.1);
+  border: 1px solid rgba(255, 239, 196, 0.18);
   border-radius: 9px;
-  background: #082824;
+  background: var(--deep);
 }
 
 .chart-svg {
@@ -770,14 +776,14 @@ main {
 }
 
 .chart-marker-letter {
-  fill: #17352e;
+  fill: var(--deep);
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 750;
 }
 
 .chart-marker-kicker {
-  fill: #dce8df;
+  fill: var(--cream);
   font-family: var(--font-sans);
   font-size: 7.5px;
   font-weight: 700;
@@ -785,7 +791,7 @@ main {
 }
 
 .chart-marker-coord {
-  fill: #90aa9b;
+  fill: var(--sky);
   font-family: var(--font-mono);
   font-size: 7px;
   font-weight: 400;
@@ -793,7 +799,7 @@ main {
 }
 
 .chart-route-label {
-  fill: #b5cbbb;
+  fill: var(--cream);
   font-family: var(--font-mono);
   font-size: 6.5px;
   font-weight: 500;
@@ -807,14 +813,14 @@ main {
 }
 
 .chart-scale text {
-  fill: #b9cfc0;
+  fill: var(--cream);
   font-family: var(--font-mono);
   font-size: 6.5px;
   letter-spacing: 0.04em;
 }
 
 .chart-compass-label {
-  fill: #c4d7c8;
+  fill: var(--cream);
   font-family: var(--font-sans);
   font-size: 7px;
   font-weight: 650;
@@ -830,7 +836,7 @@ main {
 }
 
 .chart-empty-copy {
-  fill: #8fa99a;
+  fill: var(--cream);
   font-family: var(--font-sans);
   font-size: 8px;
   font-weight: 450;
@@ -838,7 +844,8 @@ main {
 }
 
 .chart-watermark {
-  fill: #6e8e7e;
+  fill: var(--sky);
+  opacity: 0.8;
   font-family: var(--font-mono);
   font-size: 6.5px;
   font-weight: 500;
@@ -866,7 +873,7 @@ main {
 .chart-stat {
   min-width: 0;
   padding-left: 16px;
-  border-left: 1px solid rgba(187, 211, 196, 0.12);
+  border-left: 1px solid rgba(151, 215, 255, 0.2);
 }
 
 .chart-stat:first-child {
@@ -876,7 +883,7 @@ main {
 
 .chart-stat__label {
   display: block;
-  color: #86a294;
+  color: var(--cream);
   font-size: 7.5px;
   font-weight: 650;
   line-height: 1.2;
@@ -898,7 +905,7 @@ main {
 }
 
 .chart-stat small {
-  color: var(--sage);
+  color: var(--cream);
   font-family: var(--font-sans);
   font-size: 8px;
   font-weight: 600;
@@ -912,11 +919,11 @@ main {
   font-size: 12px;
   font-weight: 450;
   letter-spacing: -0.02em;
-  color: #d5e2d8;
+  color: var(--cream);
 }
 
 .chart-stat__formats span {
-  color: #5f7f70;
+  color: var(--mid);
 }
 
 /* ---------- GPX preview ---------- */
@@ -927,8 +934,8 @@ main {
   border-radius: 17px;
   background: var(--panel);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.65) inset,
-    0 26px 70px -52px rgba(22, 51, 45, 0.5);
+    0 1px 0 rgba(255, 252, 238, 0.7) inset,
+    0 26px 70px -52px rgba(6, 74, 103, 0.38);
   animation: rise-in 0.65s 0.14s ease-out both;
 }
 
@@ -967,14 +974,14 @@ main {
 }
 
 .copy-button:hover:not(:disabled) {
-  border-color: #a69c88;
-  background: #fcf9f1;
+  border-color: var(--mid);
+  background: #fff8df;
   color: var(--ink);
 }
 
 .copy-button.is-copied {
-  border-color: rgba(45, 123, 96, 0.4);
-  background: rgba(45, 123, 96, 0.07);
+  border-color: rgba(8, 98, 136, 0.4);
+  background: rgba(8, 98, 136, 0.08);
   color: var(--success);
 }
 
@@ -984,9 +991,9 @@ main {
 
 .code-frame {
   overflow: hidden;
-  border: 1px solid #173e37;
+  border: 1px solid rgba(255, 239, 196, 0.22);
   border-radius: 10px;
-  background: #0a2b27;
+  background: var(--deep);
 }
 
 .code-toolbar {
@@ -995,8 +1002,8 @@ main {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border-bottom: 1px solid rgba(188, 213, 197, 0.1);
-  color: #829e8e;
+  border-bottom: 1px solid rgba(151, 215, 255, 0.16);
+  color: var(--cream);
   font-family: var(--font-mono);
   font-size: 7px;
   font-weight: 450;
@@ -1020,7 +1027,7 @@ main {
   height: 5px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: var(--coral);
+  background: var(--sky);
 }
 
 .code-block {
@@ -1028,14 +1035,14 @@ main {
   margin: 0;
   padding: 13px 14px 15px;
   overflow: auto;
-  color: #bdd2c2;
+  color: var(--cream);
   font-family: var(--font-mono);
   font-size: 9px;
   font-weight: 400;
   line-height: 1.62;
   letter-spacing: -0.03em;
   tab-size: 2;
-  scrollbar-color: #3b5f52 transparent;
+  scrollbar-color: var(--mid) transparent;
   scrollbar-width: thin;
 }
 
@@ -1050,9 +1057,9 @@ main {
 }
 
 .code-block::-webkit-scrollbar-thumb {
-  border: 2px solid #0a2b27;
+  border: 2px solid var(--deep);
   border-radius: 99px;
-  background: #3b5f52;
+  background: var(--mid);
 }
 
 .gpx-note {

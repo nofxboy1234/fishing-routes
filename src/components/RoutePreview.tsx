@@ -79,7 +79,7 @@ function RouteLine({
       <path
         d={path}
         fill="none"
-        stroke="#f2b08f"
+        stroke="#97d7ff"
         strokeWidth="12"
         strokeLinecap="round"
         opacity="0.09"
@@ -87,7 +87,7 @@ function RouteLine({
       <path
         d={path}
         fill="none"
-        stroke="#f5eee1"
+        stroke="#ffefc4"
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeDasharray="2 9"
@@ -104,9 +104,9 @@ function RouteLine({
           width="44"
           height="18"
           rx="9"
-          fill="#0b302c"
-          stroke="#6b897a"
-          strokeOpacity="0.6"
+          fill="#086288"
+          stroke="#97d7ff"
+          strokeOpacity="0.7"
         />
         <text
           textAnchor="middle"
@@ -130,7 +130,8 @@ function Marker({
   tone: 'start' | 'end'
 }) {
   const isStart = tone === 'start'
-  const color = isStart ? '#f0714c' : '#e9c86b'
+  const color = isStart ? '#ffefc4' : '#97d7ff'
+  const stroke = isStart ? '#97d7ff' : '#ffefc4'
   const labelOnRight = point.x < VIEW_WIDTH - 80
   const labelX = labelOnRight ? point.x + 24 : point.x - 24
   const textAnchor = labelOnRight ? 'start' : 'end'
@@ -150,7 +151,7 @@ function Marker({
         cy={point.y}
         r="12"
         fill={color}
-        stroke="#f7f1e6"
+        stroke={stroke}
         strokeWidth="2.5"
       />
       <text
@@ -232,22 +233,22 @@ export default function RoutePreview({
               <path
                 d="M 32 0 H 0 V 32"
                 fill="none"
-                stroke="#adc8b9"
+                stroke="#97d7ff"
                 strokeOpacity="0.09"
                 strokeWidth="1"
               />
             </pattern>
             <radialGradient id="chart-glow" cx="50%" cy="42%" r="70%">
-              <stop offset="0%" stopColor="#155046" stopOpacity="0.7" />
-              <stop offset="100%" stopColor="#082925" stopOpacity="0" />
+              <stop offset="0%" stopColor="#4d8dba" stopOpacity="0.75" />
+              <stop offset="100%" stopColor="#086288" stopOpacity="0" />
             </radialGradient>
             <linearGradient id="chart-route" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#f5eee1" />
-              <stop offset="100%" stopColor="#c3d7c7" />
+              <stop offset="0%" stopColor="#ffefc4" />
+              <stop offset="100%" stopColor="#97d7ff" />
             </linearGradient>
           </defs>
 
-          <rect width={VIEW_WIDTH} height={VIEW_HEIGHT} fill="#0a2d29" />
+          <rect width={VIEW_WIDTH} height={VIEW_HEIGHT} fill="#086288" />
           <rect
             width={VIEW_WIDTH}
             height={VIEW_HEIGHT}
@@ -261,7 +262,7 @@ export default function RoutePreview({
 
           <g
             fill="none"
-            stroke="#b8d0c0"
+            stroke="#97d7ff"
             strokeWidth="1"
             opacity="0.13"
             aria-hidden="true"
@@ -280,7 +281,7 @@ export default function RoutePreview({
           </g>
 
           <g
-            fill="#aec6b8"
+            fill="#ffefc4"
             opacity="0.25"
             aria-hidden="true"
             className="chart-soundings"
@@ -305,7 +306,7 @@ export default function RoutePreview({
           <g aria-hidden="true" className="chart-scale">
             <path
               d="M 38 348 H 128 M 38 343 V 353 M 128 343 V 353 M 83 345 V 351"
-              stroke="#c0d4c5"
+              stroke="#ffefc4"
               strokeOpacity="0.5"
               fill="none"
             />
@@ -322,13 +323,13 @@ export default function RoutePreview({
             opacity="0.65"
             aria-hidden="true"
           >
-            <circle r="22" fill="none" stroke="#c4d7c8" strokeWidth="1" />
+            <circle r="22" fill="none" stroke="#ffefc4" strokeWidth="1" />
             <path
               d="M 0 -18 L 4.5 0 L 0 18 L -4.5 0 Z"
-              fill="#c4d7c8"
+              fill="#ffefc4"
               opacity="0.85"
             />
-            <path d="M -18 0 L 0 4 L 18 0 L 0 -4 Z" fill="#c4d7c8" opacity="0.35" />
+            <path d="M -18 0 L 0 4 L 18 0 L 0 -4 Z" fill="#ffefc4" opacity="0.35" />
             <text
               y="-28"
               textAnchor="middle"
@@ -361,14 +362,14 @@ export default function RoutePreview({
                 cy={VIEW_HEIGHT / 2 - 18}
                 r="34"
                 fill="none"
-                stroke="#e9c86b"
+                stroke="#ffefc4"
                 strokeOpacity="0.5"
                 strokeDasharray="3 6"
               />
               <path
                 d={`M ${VIEW_WIDTH / 2 - 11} ${VIEW_HEIGHT / 2 - 24} L ${VIEW_WIDTH / 2 + 9} ${VIEW_HEIGHT / 2 - 34} L ${VIEW_WIDTH / 2 + 1} ${VIEW_HEIGHT / 2 - 13} L ${VIEW_WIDTH / 2 + 7} ${VIEW_HEIGHT / 2 - 2}`}
                 fill="none"
-                stroke="#e9c86b"
+                stroke="#97d7ff"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="1.5"

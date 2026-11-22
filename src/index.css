@@ -1,23 +1,21 @@
 :root {
-  --paper: #ece7da;
-  --paper-deep: #e3dccb;
-  --panel: #f8f4ea;
-  --panel-soft: #f2ecdf;
-  --ink: #16332d;
-  --ink-soft: #435a52;
-  --muted: #6d7b73;
-  --faint: #9b9e92;
-  --line: #d8d1c0;
-  --line-strong: #beb6a3;
-  --deep: #092d29;
-  --deep-raised: #0e3933;
-  --cream: #f7f1e5;
-  --sage: #a9c2b2;
-  --coral: #ef7250;
-  --coral-strong: #c55336;
-  --sun: #e6c66e;
-  --success: #2d7b60;
-  --danger: #b23f2a;
+  --paper: #97d7ff;
+  --paper-deep: #7ecbf4;
+  --panel: #ffefc4;
+  --panel-soft: #f8e5ae;
+  --ink: #064a67;
+  --ink-soft: #075575;
+  --muted: #1f5c77;
+  --faint: #3d708a;
+  --line: rgba(8, 98, 136, 0.2);
+  --line-strong: rgba(8, 98, 136, 0.4);
+  --deep: #086288;
+  --deep-raised: #0e6f99;
+  --mid: #4d8dba;
+  --sky: #97d7ff;
+  --cream: #ffefc4;
+  --success: #086288;
+  --danger: #943929;
   --font-sans: 'Manrope Variable', 'Segoe UI', Helvetica, Arial, sans-serif;
   --font-display: 'Newsreader Variable', 'Iowan Old Style', Palatino, Georgia,
     serif;
@@ -51,16 +49,16 @@ body {
   background-image:
     radial-gradient(
       circle at 8% -8%,
-      rgba(255, 255, 255, 0.78),
-      transparent 36rem
+      rgba(255, 239, 196, 0.86),
+      transparent 38rem
     ),
     radial-gradient(
       circle at 94% 16%,
-      rgba(180, 207, 190, 0.42),
+      rgba(77, 141, 186, 0.36),
       transparent 34rem
     ),
-    linear-gradient(rgba(22, 51, 45, 0.032) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(22, 51, 45, 0.032) 1px, transparent 1px);
+    linear-gradient(rgba(8, 98, 136, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(8, 98, 136, 0.055) 1px, transparent 1px);
   background-size:
     auto,
     auto,
@@ -88,11 +86,11 @@ button:disabled {
 
 ::selection {
   color: var(--cream);
-  background: var(--coral-strong);
+  background: var(--deep);
 }
 
 :focus-visible {
-  outline: 2px solid var(--coral-strong);
+  outline: 2px solid var(--deep);
   outline-offset: 2px;
 }
 
