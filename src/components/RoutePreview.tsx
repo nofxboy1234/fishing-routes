@@ -408,7 +408,7 @@ export default function RoutePreview({
         <div className="chart-stat">
           <span className="chart-stat__label">Distance</span>
           <strong>
-            {distance === null ? '—' : distance.toFixed(1)}
+            {distance === null ? '—' : distance.toFixed(2)}
             <small>km</small>
           </strong>
         </div>

@@ -19,7 +19,7 @@ main {
   align-items: center;
   gap: 10px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 13.5px;
   font-weight: 750;
   line-height: 1;
   letter-spacing: 0.17em;
@@ -47,7 +47,7 @@ main {
   border-radius: 50%;
   color: var(--ink);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0;
 }
@@ -85,7 +85,7 @@ main {
   margin: 10px 0 0;
   color: var(--ink);
   font-family: var(--font-display);
-  font-size: clamp(27px, 2.7vw, 33px);
+  font-size: clamp(40.5px, 4.05vw, 49.5px);
   font-weight: 430;
   line-height: 1;
   letter-spacing: -0.035em;
@@ -100,10 +100,11 @@ main {
   border-radius: 7px;
   background: transparent;
   color: var(--muted);
-  font-size: 9.5px;
+  font-size: 14.25px;
   font-weight: 650;
   line-height: 1;
   letter-spacing: 0.01em;
+  white-space: nowrap;
   transition:
     color 160ms ease,
     background-color 160ms ease,
@@ -140,7 +141,7 @@ main {
 .field__topline label,
 .field__axis {
   color: var(--ink);
-  font-size: 9.5px;
+  font-size: 14.25px;
   font-weight: 750;
   line-height: 1.2;
   letter-spacing: 0.13em;
@@ -150,7 +151,7 @@ main {
 .field__meta {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 450;
   line-height: 1.2;
   letter-spacing: 0.02em;
@@ -166,7 +167,7 @@ main {
   background: #fff8df;
   color: var(--ink);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 18px;
   font-weight: 440;
   letter-spacing: -0.025em;
   transition:
@@ -202,7 +203,7 @@ main {
 .field-error {
   margin: 6px 0 0;
   color: var(--danger);
-  font-size: 10.5px;
+  font-size: 15.75px;
   font-weight: 500;
   line-height: 1.4;
 }
@@ -214,7 +215,7 @@ main {
 .route-name-field input {
   height: 50px;
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: 19.5px;
   font-weight: 600;
   letter-spacing: -0.012em;
 }
@@ -256,7 +257,7 @@ main {
   border-radius: 50%;
   color: var(--deep);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 750;
   line-height: 1;
   box-shadow: 0 0 0 1px rgba(8, 98, 136, 0.16) inset;
@@ -276,7 +277,7 @@ main {
   display: block;
   margin-bottom: 2px;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: 0.12em;
@@ -286,7 +287,7 @@ main {
 .waypoint-title h3 {
   margin: 0;
   color: var(--ink);
-  font-size: 14px;
+  font-size: 21px;
   font-weight: 720;
   line-height: 1.2;
   letter-spacing: -0.015em;
@@ -311,7 +312,7 @@ main {
   background: transparent;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0.04em;
@@ -351,7 +352,7 @@ main {
   border-radius: 7px;
   background: rgba(255, 248, 223, 0.6);
   color: var(--ink-soft);
-  font-size: 8.5px;
+  font-size: 12.75px;
   font-weight: 650;
   line-height: 1;
   white-space: nowrap;
@@ -376,7 +377,7 @@ main {
   margin: 8px 0 0;
   padding: 6px 8px;
   border-radius: 6px;
-  font-size: 9px;
+  font-size: 13.5px;
   font-weight: 550;
   line-height: 1.4;
 }
@@ -399,6 +400,10 @@ main {
   align-items: start;
 }
 
+.coordinate-grid--ddm {
+  grid-template-columns: 1fr;
+}
+
 .ddm-inputs {
   display: grid;
   grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr) 58px;
@@ -414,7 +419,7 @@ main {
 
 .ddm-part > span {
   color: var(--muted);
-  font-size: 7.5px;
+  font-size: 11.25px;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: 0.09em;
@@ -442,7 +447,7 @@ main {
     4px 4px;
   color: var(--ink);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 16.5px;
   font-weight: 600;
   text-align: center;
   text-align-last: center;
@@ -468,81 +473,7 @@ main {
   padding: 0 11px;
   border-color: var(--line-strong);
   background: #fff5d9;
-  font-size: 11px;
-}
-
-.waypoint-meta {
-  margin-top: 13px;
-  padding-top: 11px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
-  border-top: 1px dashed var(--line);
-}
-
-.waypoint-hint {
-  max-width: 280px;
-  margin: 0;
-  color: var(--muted);
-  font-size: 9.5px;
-  font-weight: 480;
-  line-height: 1.5;
-}
-
-.waypoint-hint span {
-  margin-right: 4px;
-  color: var(--deep);
-  font-size: 11px;
-}
-
-.conversion {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  flex: 0 0 auto;
-}
-
-.conversion__label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--faint);
-  font-size: 7.5px;
-  font-weight: 750;
-  line-height: 1;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-}
-
-.conversion__dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--line-strong);
-}
-
-.conversion--ready .conversion__dot {
-  background: var(--success);
-  box-shadow: 0 0 0 3px rgba(8, 98, 136, 0.1);
-}
-
-.conversion__value {
-  padding: 4px 6px;
-  border-radius: 4px;
-  background: rgba(8, 98, 136, 0.07);
-  color: var(--ink);
-  font-family: var(--font-mono);
-  font-size: 9px;
-  font-weight: 470;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  white-space: nowrap;
-}
-
-.conversion__divider {
-  color: var(--faint);
+  font-size: 16.5px;
 }
 
 /* ---------- Export ---------- */
@@ -595,7 +526,7 @@ main {
 
 .export-status strong {
   color: var(--cream);
-  font-size: 11.5px;
+  font-size: 17.25px;
   font-weight: 650;
   line-height: 1.2;
   letter-spacing: -0.01em;
@@ -604,7 +535,7 @@ main {
 .export-status span:last-child {
   color: var(--cream);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 11.25px;
   line-height: 1.35;
   letter-spacing: 0.015em;
 }
@@ -621,7 +552,7 @@ main {
   border-radius: 8px;
   background: var(--cream);
   color: var(--deep);
-  font-size: 11px;
+  font-size: 16.5px;
   font-weight: 750;
   line-height: 1;
   letter-spacing: -0.005em;
@@ -695,7 +626,7 @@ main {
   margin: 9px 0 0;
   color: var(--cream);
   font-family: var(--font-display);
-  font-size: clamp(25px, 2.5vw, 31px);
+  font-size: clamp(37.5px, 3.75vw, 46.5px);
   font-weight: 420;
   line-height: 1.06;
   letter-spacing: -0.03em;
@@ -714,7 +645,7 @@ main {
   color: var(--cream);
   background: rgba(255, 239, 196, 0.05);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 11.25px;
   font-weight: 500;
   line-height: 1;
   letter-spacing: 0.03em;
@@ -746,14 +677,14 @@ main {
 .chart-marker-letter {
   fill: var(--deep);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 750;
 }
 
 .chart-marker-kicker {
   fill: var(--cream);
   font-family: var(--font-sans);
-  font-size: 7.5px;
+  font-size: 11.25px;
   font-weight: 700;
   letter-spacing: 0.12em;
 }
@@ -761,7 +692,7 @@ main {
 .chart-marker-coord {
   fill: var(--sky);
   font-family: var(--font-mono);
-  font-size: 7px;
+  font-size: 10.5px;
   font-weight: 400;
   letter-spacing: -0.01em;
 }
@@ -769,28 +700,28 @@ main {
 .chart-route-label {
   fill: var(--cream);
   font-family: var(--font-mono);
-  font-size: 6.5px;
+  font-size: 9.75px;
   font-weight: 500;
   letter-spacing: 0.1em;
 }
 
 .chart-soundings text {
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 11.25px;
   letter-spacing: 0.04em;
 }
 
 .chart-scale text {
   fill: var(--cream);
   font-family: var(--font-mono);
-  font-size: 6.5px;
+  font-size: 9.75px;
   letter-spacing: 0.04em;
 }
 
 .chart-compass-label {
   fill: var(--cream);
   font-family: var(--font-sans);
-  font-size: 7px;
+  font-size: 10.5px;
   font-weight: 650;
   letter-spacing: 0.06em;
 }
@@ -798,7 +729,7 @@ main {
 .chart-empty-title {
   fill: var(--cream);
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 24px;
   font-weight: 400;
   letter-spacing: -0.01em;
 }
@@ -806,7 +737,7 @@ main {
 .chart-empty-copy {
   fill: var(--cream);
   font-family: var(--font-sans);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 450;
   letter-spacing: 0.01em;
 }
@@ -815,7 +746,7 @@ main {
   fill: var(--sky);
   opacity: 0.8;
   font-family: var(--font-mono);
-  font-size: 6.5px;
+  font-size: 9.75px;
   font-weight: 500;
   letter-spacing: 0.16em;
 }
@@ -852,7 +783,7 @@ main {
 .chart-stat__label {
   display: block;
   color: var(--cream);
-  font-size: 7.5px;
+  font-size: 11.25px;
   font-weight: 650;
   line-height: 1.2;
   letter-spacing: 0.12em;
@@ -866,7 +797,7 @@ main {
   gap: 5px;
   color: var(--cream);
   font-family: var(--font-display);
-  font-size: 25px;
+  font-size: 37.5px;
   font-weight: 380;
   line-height: 1;
   letter-spacing: -0.035em;
@@ -875,7 +806,7 @@ main {
 .chart-stat small {
   color: var(--cream);
   font-family: var(--font-sans);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.04em;
@@ -884,7 +815,7 @@ main {
 
 .chart-stat .chart-stat__formats {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 18px;
   font-weight: 450;
   letter-spacing: -0.02em;
   color: var(--cream);
@@ -905,7 +836,7 @@ main {
   gap: 18px;
   border-top: 1px solid var(--line);
   color: var(--muted);
-  font-size: 9px;
+  font-size: 13.5px;
   font-weight: 600;
   line-height: 1.4;
 }
@@ -915,7 +846,7 @@ main {
   align-items: center;
   gap: 8px;
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 11.25px;
   font-weight: 450;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -970,9 +901,6 @@ main {
     padding: 24px;
   }
 
-  .waypoint-hint {
-    max-width: 230px;
-  }
 }
 
 @media (max-width: 940px) {
@@ -1002,14 +930,11 @@ main {
   }
 
   .chart-stat strong {
-    font-size: 28px;
+    font-size: 42px;
   }
 
 
 
-  .waypoint-hint {
-    max-width: 390px;
-  }
 }
 
 @media (max-width: 760px) {
@@ -1026,7 +951,7 @@ main {
   }
 
   .panel-heading h2 {
-    font-size: 29px;
+    font-size: 43.5px;
   }
 
   .coordinate-grid {
@@ -1038,7 +963,7 @@ main {
   }
 
   .waypoint-card .field input {
-    font-size: 10.5px;
+    font-size: 15.75px;
   }
 
   .export-zone {
@@ -1058,7 +983,7 @@ main {
   }
 
   .chart-stat strong {
-    font-size: 24px;
+    font-size: 36px;
   }
 
 
@@ -1082,12 +1007,12 @@ main {
   }
 
   .panel-heading h2 {
-    font-size: 27px;
+    font-size: 40.5px;
   }
 
   .text-button {
     padding: 6px 4px;
-    font-size: 9px;
+    font-size: 13.5px;
   }
 
   .text-button svg {
@@ -1111,21 +1036,7 @@ main {
 
   .waypoint-card .field input {
     height: 45px;
-    font-size: 11.5px;
-  }
-
-  .waypoint-meta {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .conversion {
-    align-items: flex-start;
-  }
-
-  .conversion__value {
-    font-size: 10px;
+    font-size: 17.25px;
   }
 
   .export-zone {
@@ -1149,12 +1060,12 @@ main {
   }
 
   .chart-card__header h2 {
-    font-size: 25px;
+    font-size: 37.5px;
   }
 
   .live-badge {
     padding: 5px 7px;
-    font-size: 7px;
+    font-size: 10.5px;
   }
 
   .chart-canvas {
@@ -1170,16 +1081,16 @@ main {
   }
 
   .chart-stat strong {
-    font-size: 21px;
+    font-size: 31.5px;
     gap: 3px;
   }
 
   .chart-stat .chart-stat__formats {
-    font-size: 10px;
+    font-size: 15px;
   }
 
   .chart-stat__label {
-    font-size: 6.8px;
+    font-size: 10.2px;
   }
 
 

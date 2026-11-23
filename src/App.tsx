@@ -432,35 +432,6 @@ function App() {
     downloadGpx(gpxContent, filename)
   }
 
-  function renderConversion(waypoint: WaypointKey) {
-    const latitude = parsed[waypoint].lat
-    const longitude = parsed[waypoint].lon
-    const ready = latitude.ok && longitude.ok
-
-    return (
-      <div
-        className={`conversion ${ready ? 'conversion--ready' : ''}`}
-        aria-live="polite"
-      >
-        <span className="conversion__label">
-          <span className="conversion__dot" aria-hidden="true" />
-          Standard DD
-        </span>
-        <span className="conversion__value">
-          {latitude.ok && longitude.ok ? (
-            <>
-              {formatDd(latitude.value, latitude.decimals)}
-              <span className="conversion__divider"> / </span>
-              {formatDd(longitude.value, longitude.decimals)}
-            </>
-          ) : (
-            '— / —'
-          )}
-        </span>
-      </div>
-    )
-  }
-
   return (
     <div className="site-shell">
       <main>
@@ -613,7 +584,6 @@ function App() {
                         <div className="field">
                           <div className="field__topline">
                             <label htmlFor={`${waypoint}-lat`}>Latitude</label>
-                            <span className="field__meta">DD</span>
                           </div>
                           <input
                             id={`${waypoint}-lat`}
@@ -657,7 +627,6 @@ function App() {
                             <label htmlFor={`${waypoint}-lon`}>
                               Longitude
                             </label>
-                            <span className="field__meta">DD</span>
                           </div>
                           <input
                             id={`${waypoint}-lon`}
@@ -707,7 +676,6 @@ function App() {
                             <span className="field__axis" id={latAxisId}>
                               Latitude
                             </span>
-                            <span className="field__meta">DDM</span>
                           </div>
                           <div className="ddm-inputs">
                             <label className="ddm-part">
@@ -808,7 +776,6 @@ function App() {
                             <span className="field__axis" id={lonAxisId}>
                               Longitude
                             </span>
-                            <span className="field__meta">DDM</span>
                           </div>
                           <div className="ddm-inputs">
                             <label className="ddm-part">
@@ -903,13 +870,6 @@ function App() {
                     )}
                   </div>
 
-                  <div className="waypoint-meta">
-                    <p className="waypoint-hint">
-                      <span aria-hidden="true">↳</span>
-                      {message}
-                    </p>
-                    {renderConversion(waypoint)}
-                  </div>
                 </section>
               )
             })}
