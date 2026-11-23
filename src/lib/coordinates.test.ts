@@ -6,6 +6,7 @@ import {
   parseCoordinatePair,
   parseDdCoordinate,
   parseDdmParts,
+  parseGpxStudioCoordinatePair,
   parseWaypoint,
   type ParseResult,
 } from './coordinates'
@@ -171,6 +172,13 @@ describe('parseCoordinatePair', () => {
     })
   })
 
+  it('accepts the space-separated format copied from gpx.studio', () => {
+    expect(parseCoordinatePair('-29.935797 31.009616')).toEqual({
+      lat: '-29.935797',
+      lon: '31.009616',
+    })
+  })
+
   it('handles surrounding parentheses and extra whitespace', () => {
     expect(parseCoordinatePair('  (-29.865207, 31.064148)  ')).toEqual({
       lat: '-29.865207',
@@ -209,59 +217,105 @@ describe('explicit DD parsing', () => {
 })
 
 describe('split DDM parsing', () => {
-  it('combines signed degrees and decimal minutes', () => {
-    expect(parseDdmParts('-29', '56.143164', 'lat')).toMatchObject({
+  it('combines positive degrees and minutes with hemispheres', () => {
+    expect(parseDdmParts('29', '56.143164', 'lat', 'S')).toMatchObject({
       ok: true,
       value: expect.closeTo(-29.9357194, 9),
       format: 'ddm',
       decimals: 7,
     })
-    expect(parseDdmParts('31', '0.578784', 'lon')).toMatchObject({
+    expect(parseDdmParts('31', '0.578784', 'lon', 'E')).toMatchObject({
       ok: true,
       value: expect.closeTo(31.0096464, 9),
       format: 'ddm',
       decimals: 7,
     })
+    expect(valueOf(parseDdmParts('29', '56.143164', 'lat', 'N'))).toBeCloseTo(
+      29.9357194,
+      9,
+    )
+    expect(valueOf(parseDdmParts('31', '0.578784', 'lon', 'W'))).toBeCloseTo(
+      -31.0096464,
+      9,
+    )
   })
 
-  it('uses a negative zero degree value to keep the hemisphere', () => {
-    expect(valueOf(parseDdmParts('-0', '30', 'lat'))).toBeCloseTo(-0.5, 10)
-    expect(valueOf(parseDdmParts('0', '30', 'lat'))).toBeCloseTo(0.5, 10)
-  })
-
-  it('rejects invalid degree and minute inputs', () => {
-    expect(parseDdmParts('29.5', '10', 'lat').ok).toBe(false)
-    expect(parseDdmParts('91', '0', 'lat').ok).toBe(false)
-    expect(parseDdmParts('-29', '60', 'lat').ok).toBe(false)
-    expect(parseDdmParts('', '10', 'lat').ok).toBe(false)
-    expect(parseDdmParts('29', '', 'lat').ok).toBe(false)
+  it('rejects invalid degree, minute, and hemisphere inputs', () => {
+    expect(parseDdmParts('29.5', '10', 'lat', 'S').ok).toBe(false)
+    expect(parseDdmParts('91', '0', 'lat', 'S').ok).toBe(false)
+    expect(parseDdmParts('29', '60', 'lat', 'S').ok).toBe(false)
+    expect(parseDdmParts('', '10', 'lat', 'S').ok).toBe(false)
+    expect(parseDdmParts('29', '', 'lat', 'S').ok).toBe(false)
+    expect(parseDdmParts('-29', '0', 'lat', 'S').ok).toBe(false)
+    expect(parseDdmParts('29', '0', 'lat', 'E').ok).toBe(false)
   })
 })
 
 describe('split DDM formatting', () => {
-  it('converts decimal degrees into signed degrees and minutes', () => {
-    expect(formatDdmParts(-29.9357194)).toEqual({
-      degrees: '-29',
+  it('converts decimal degrees into positive degrees, minutes, and hemisphere', () => {
+    expect(formatDdmParts(-29.9357194, 'lat')).toEqual({
+      degrees: '29',
       minutes: '56.143164',
+      hemisphere: 'S',
     })
-    expect(formatDdmParts(31.0096464)).toEqual({
+    expect(formatDdmParts(31.0096464, 'lon')).toEqual({
       degrees: '31',
       minutes: '0.578784',
+      hemisphere: 'E',
     })
-    expect(formatDdmParts(-29.960267)).toEqual({
-      degrees: '-29',
+    expect(formatDdmParts(-29.960267, 'lat')).toEqual({
+      degrees: '29',
       minutes: '57.61602',
+      hemisphere: 'S',
     })
-    expect(formatDdmParts(31.0165)).toEqual({
+    expect(formatDdmParts(31.0165, 'lon')).toEqual({
       degrees: '31',
       minutes: '0.99',
+      hemisphere: 'E',
     })
   })
 
-  it('preserves a negative sign for values below one degree', () => {
-    expect(formatDdmParts(-0.5)).toEqual({
-      degrees: '-0',
+  it('preserves the hemisphere for values below one degree', () => {
+    expect(formatDdmParts(-0.5, 'lat')).toEqual({
+      degrees: '0',
       minutes: '30',
+      hemisphere: 'S',
     })
+    expect(formatDdmParts(-0.5, 'lon')).toEqual({
+      degrees: '0',
+      minutes: '30',
+      hemisphere: 'W',
+    })
+  })
+})
+
+describe('parseGpxStudioCoordinatePair', () => {
+  it('parses the space-separated DD format copied from gpx.studio', () => {
+    expect(parseGpxStudioCoordinatePair('-29.935797 31.009616')).toEqual({
+      ok: true,
+      pair: { lat: '-29.935797', lon: '31.009616' },
+    })
+  })
+
+  it('also accepts a comma-separated DD pair', () => {
+    expect(parseGpxStudioCoordinatePair('-29.935797, 31.009616')).toEqual({
+      ok: true,
+      pair: { lat: '-29.935797', lon: '31.009616' },
+    })
+  })
+
+  it('rejects DDM notation because gpx.studio copies DD', () => {
+    expect(
+      parseGpxStudioCoordinatePair('29° 56.14782′ S 31° 00.57696′ E').ok,
+    ).toBe(false)
+  })
+
+  it('gives specific errors for empty, malformed, and out-of-range input', () => {
+    expect(parseGpxStudioCoordinatePair('')).toMatchObject({
+      ok: false,
+      error: 'Clipboard is empty. Copy a point from gpx.studio first.',
+    })
+    expect(parseGpxStudioCoordinatePair('not coordinates').ok).toBe(false)
+    expect(parseGpxStudioCoordinatePair('-29.935797 999').ok).toBe(false)
   })
 })

@@ -29,23 +29,27 @@ Open the URL printed by Vite (normally <http://localhost:5173/fishing-routes/>).
 Use the **DD / DDM** switch on each waypoint to choose its input format. DDM is
 selected by default.
 
-| Format | Latitude entry                               | Longitude entry                             |
-| ------ | -------------------------------------------- | ------------------------------------------- |
-| DD     | `-29.9357194`                                | `31.0096464`                                |
-| DDM    | Degrees `-29`, minutes `56.143164`           | Degrees `31`, minutes `0.578784`            |
+| Format | Latitude entry                                      | Longitude entry                                    |
+| ------ | --------------------------------------------------- | -------------------------------------------------- |
+| DD     | `-29.935797`                                        | `31.009616`                                        |
+| DDM    | Degrees `29`, minutes `56.14782`, hemisphere `S`    | Degrees `31`, minutes `0.57696`, hemisphere `E`    |
 
-In DDM mode, degrees and minutes have their own fields—no degree or minute
-symbols are needed. Make the degrees negative for south or west. Switching
-between DD and DDM converts the values already entered.
+In DDM mode, degrees and minutes have their own fields plus an N/S or E/W
+selector—no degree or minute symbols are needed. Enter positive degrees and use
+the hemisphere selector for south or west. Switching between DD and DDM
+converts the values already entered.
 
 To fill both latitude and longitude at once, paste a coordinate pair such as
 `-29.865207, 31.064148` into any coordinate field. Parentheses and DDM pairs are
-supported too.
+supported too. The **Paste from gpx.studio** button reads the clipboard directly
+and explicitly validates gpx.studio’s DD format, such as
+`-29.935797 31.009616` or `-29.935797, 31.009616`. Invalid clipboard contents
+produce a specific inline error.
 
 All coordinates are validated against their geographic range and converted to
 standard decimal degrees for the GPX file. Six decimal places are used as the
 minimum output precision, and extra precision is preserved—for example, the
-default start coordinates are written as `-29.9357194` and `31.0096464`.
+default start coordinates are written as `-29.935797` and `31.009616`.
 
 ## GPX output
 

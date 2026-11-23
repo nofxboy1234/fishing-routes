@@ -1,5 +1,6 @@
 export type CoordinateFormat = 'dd' | 'ddm'
 export type Axis = 'lat' | 'lon'
+export type Hemisphere = 'N' | 'S' | 'E' | 'W'
 
 export interface Coordinate {
   lat: number
@@ -137,6 +138,7 @@ export function parseDdmParts(
   degreesRaw: string,
   minutesRaw: string,
   axis: Axis,
+  hemisphere: Hemisphere,
 ): ParseResult {
   const config = AXIS_CONFIG[axis]
   const degreeText = degreesRaw.trim()
@@ -146,7 +148,10 @@ export function parseDdmParts(
     return fail(`Enter ${config.label.toLowerCase()} degrees.`)
   }
 
-  if (!/^[+-]?\d+$/.test(degreeText)) {
+  if (!/^\+?\d+$/.test(degreeText)) {
+    if (/^[+-]?\d+$/.test(degreeText)) {
+      return fail('Enter positive degrees and choose S or W for direction.')
+    }
     return fail('Degrees must be a whole number.')
   }
 
@@ -158,27 +163,31 @@ export function parseDdmParts(
     return fail('Minutes must be a number.')
   }
 
+  if (!config.hemispheres.some((item) => item === hemisphere)) {
+    return fail(
+      `Choose ${config.hemispheres.join(' or ')} for ${config.label.toLowerCase()}.`,
+    )
+  }
+
   const degrees = Number(degreeText)
   const minutes = Number(minuteText)
 
-  if (Math.abs(degrees) > config.max) {
-    return fail(
-      `${config.label} degrees must be between -${config.max} and ${config.max}.`,
-    )
+  if (degrees > config.max) {
+    return fail(`${config.label} degrees must be between 0 and ${config.max}.`)
   }
 
   if (minutes < 0 || minutes >= 60) {
     return fail('Minutes must be at least 0 and less than 60.')
   }
 
-  const value = Math.abs(degrees) + minutes / 60
+  const value = degrees + minutes / 60
   if (value > config.max) {
     return fail(
       `${config.label} must be between -${config.max} and ${config.max}.`,
     )
   }
 
-  const negative = degreeText.startsWith('-')
+  const negative = hemisphere === 'S' || hemisphere === 'W'
 
   return {
     ok: true,
@@ -288,9 +297,13 @@ export function formatDd(value: number, decimals = MIN_DECIMALS): string {
   return normalizeZero(value).toFixed(clampDecimals(decimals))
 }
 
-export function formatDdmParts(value: number): {
+export function formatDdmParts(
+  value: number,
+  axis: Axis,
+): {
   degrees: string
   minutes: string
+  hemisphere: Hemisphere
 } {
   const absolute = Math.abs(value)
   let degrees = Math.floor(absolute)
@@ -303,10 +316,14 @@ export function formatDdmParts(value: number): {
 
   const minuteText =
     minutes.toFixed(6).replace(/0+$/, '').replace(/\.$/, '') || '0'
-  const degreeText =
-    value < 0 && degrees === 0 ? '-0' : String(value < 0 ? -degrees : degrees)
+  const hemisphere: Hemisphere =
+    axis === 'lat' ? (value < 0 ? 'S' : 'N') : value < 0 ? 'W' : 'E'
 
-  return { degrees: degreeText, minutes: minuteText }
+  return {
+    degrees: String(degrees),
+    minutes: minuteText,
+    hemisphere,
+  }
 }
 
 export function parseWaypoint(
@@ -328,14 +345,27 @@ export function parseCoordinatePair(
   raw: string,
 ): { lat: string; lon: string } | null {
   const text = raw.trim().replace(/^\(\s*/, '').replace(/\s*\)$/, '')
-  const parts = text.split(',')
+  let latitude = ''
+  let longitude = ''
 
-  if (parts.length !== 2) {
-    return null
+  if (text.includes(',')) {
+    const parts = text.split(',')
+    if (parts.length !== 2) {
+      return null
+    }
+    latitude = parts[0].trim()
+    longitude = parts[1].trim()
+  } else {
+    // gpx.studio displays points as "lat lon" (space separated).
+    const match = text.match(
+      /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s+([+-]?(?:\d+(?:\.\d*)?|\.\d+))$/,
+    )
+    if (!match) {
+      return null
+    }
+    latitude = match[1]
+    longitude = match[2]
   }
-
-  const latitude = parts[0].trim()
-  const longitude = parts[1].trim()
 
   if (!latitude || !longitude) {
     return null
@@ -349,4 +379,53 @@ export function parseCoordinatePair(
   }
 
   return { lat: latitude, lon: longitude }
+}
+
+export type GpxStudioPairResult =
+  | { ok: true; pair: { lat: string; lon: string } }
+  | { ok: false; error: string }
+
+/**
+ * gpx.studio copies a point as two DD values separated by whitespace (or a
+ * comma). This parser intentionally does not accept DDM notation.
+ */
+export function parseGpxStudioCoordinatePair(
+  raw: string,
+): GpxStudioPairResult {
+  const text = raw.trim()
+
+  if (!text) {
+    return {
+      ok: false,
+      error: 'Clipboard is empty. Copy a point from gpx.studio first.',
+    }
+  }
+
+  const match = text.match(
+    /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))[\s,]+([+-]?(?:\d+(?:\.\d*)?|\.\d+))$/,
+  )
+
+  if (!match) {
+    return {
+      ok: false,
+      error:
+        'That does not look like a gpx.studio point. Copy its DD coordinates, for example -29.935797 31.009616.',
+    }
+  }
+
+  const latitude = match[1]
+  const longitude = match[2]
+
+  if (
+    !parseDdCoordinate(latitude, 'lat').ok ||
+    !parseDdCoordinate(longitude, 'lon').ok
+  ) {
+    return {
+      ok: false,
+      error:
+        'Those coordinates are outside the valid latitude/longitude range.',
+    }
+  }
+
+  return { ok: true, pair: { lat: latitude, lon: longitude } }
 }

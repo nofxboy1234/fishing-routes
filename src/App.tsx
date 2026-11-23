@@ -7,7 +7,9 @@ import {
   parseCoordinatePair,
   parseDdCoordinate,
   parseDdmParts,
+  parseGpxStudioCoordinatePair,
   type CoordinateFormat,
+  type Hemisphere,
   type ParseResult,
   type RouteCoordinate,
 } from './lib/coordinates'
@@ -25,11 +27,17 @@ interface DdDraft {
 interface DdmDraft {
   latDegrees: string
   latMinutes: string
+  latHemisphere: Hemisphere
   lonDegrees: string
   lonMinutes: string
+  lonHemisphere: Hemisphere
 }
 
-type DdmFieldKey = keyof DdmDraft
+type DdmFieldKey =
+  | 'latDegrees'
+  | 'latMinutes'
+  | 'lonDegrees'
+  | 'lonMinutes'
 
 interface WaypointDraft {
   format: CoordinateFormat
@@ -48,8 +56,8 @@ const ROUTE_NAME_LIMIT = 80
 const SAMPLE_ROUTE = {
   routeName: 'Fishing Spot Route',
   start: {
-    lat: '-29.9357194',
-    lon: '31.0096464',
+    lat: '-29.935797',
+    lon: '31.009616',
   },
   end: {
     lat: '-29.960267',
@@ -58,8 +66,8 @@ const SAMPLE_ROUTE = {
 }
 
 function createWaypointDraft(lat: string, lon: string): WaypointDraft {
-  const latitudeParts = formatDdmParts(Number(lat))
-  const longitudeParts = formatDdmParts(Number(lon))
+  const latitudeParts = formatDdmParts(Number(lat), 'lat')
+  const longitudeParts = formatDdmParts(Number(lon), 'lon')
 
   return {
     format: 'ddm',
@@ -67,8 +75,10 @@ function createWaypointDraft(lat: string, lon: string): WaypointDraft {
     ddm: {
       latDegrees: latitudeParts.degrees,
       latMinutes: latitudeParts.minutes,
+      latHemisphere: latitudeParts.hemisphere,
       lonDegrees: longitudeParts.degrees,
       lonMinutes: longitudeParts.minutes,
+      lonHemisphere: longitudeParts.hemisphere,
     },
   }
 }
@@ -95,11 +105,13 @@ function parseWaypointDraft(
       draft.ddm.latDegrees,
       draft.ddm.latMinutes,
       'lat',
+      draft.ddm.latHemisphere,
     ),
     lon: parseDdmParts(
       draft.ddm.lonDegrees,
       draft.ddm.lonMinutes,
       'lon',
+      draft.ddm.lonHemisphere,
     ),
   }
 }
@@ -118,25 +130,6 @@ function validCoordinate(
   return null
 }
 
-function CompassMark() {
-  return (
-    <svg
-      className="brand-mark"
-      viewBox="0 0 44 44"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <circle cx="22" cy="22" r="20.5" fill="none" stroke="currentColor" />
-      <circle cx="22" cy="22" r="14" fill="none" stroke="currentColor" opacity=".32" />
-      <path
-        d="M22 5.5 25.6 18.4 38.5 22 25.6 25.6 22 38.5 18.4 25.6 5.5 22 18.4 18.4Z"
-        fill="currentColor"
-      />
-      <circle cx="22" cy="22" r="2.4" fill="var(--paper)" />
-    </svg>
-  )
-}
-
 function DownloadIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -147,6 +140,30 @@ function DownloadIcon() {
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth="1.7"
+      />
+    </svg>
+  )
+}
+
+function ClipboardIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <rect
+        x="5"
+        y="5"
+        width="14"
+        height="16"
+        rx="2.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M9 5V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V5"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.6"
       />
     </svg>
   )
@@ -167,28 +184,9 @@ function ResetIcon() {
   )
 }
 
-function LockIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-      <rect
-        x="4.5"
-        y="8.5"
-        width="11"
-        height="8"
-        rx="2"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.4"
-      />
-      <path
-        d="M7 8.5V6.8a3 3 0 1 1 6 0v1.7"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.4"
-      />
-    </svg>
-  )
+interface PasteNotice {
+  kind: 'success' | 'error'
+  message: string
 }
 
 function App() {
@@ -196,6 +194,9 @@ function App() {
   const [waypoints, setWaypoints] = useState<WaypointDrafts>(
     cloneSampleWaypoints,
   )
+  const [pasteNotices, setPasteNotices] = useState<
+    Record<WaypointKey, PasteNotice | null>
+  >({ start: null, end: null })
   const parsed: ParsedWaypoints = {
     start: parseWaypointDraft(waypoints.start),
     end: parseWaypointDraft(waypoints.end),
@@ -253,6 +254,25 @@ function App() {
     }))
   }
 
+  function updateDdmHemisphere(
+    waypoint: WaypointKey,
+    axis: FieldKey,
+    value: Hemisphere,
+  ) {
+    setWaypoints((current) => ({
+      ...current,
+      [waypoint]: {
+        ...current[waypoint],
+        ddm: {
+          ...current[waypoint].ddm,
+          ...(axis === 'lat'
+            ? { latHemisphere: value }
+            : { lonHemisphere: value }),
+        },
+      },
+    }))
+  }
+
   function changeFormat(
     waypoint: WaypointKey,
     nextFormat: CoordinateFormat,
@@ -285,8 +305,8 @@ function App() {
         }
       }
 
-      const latitudeParts = formatDdmParts(currentParsed.lat.value)
-      const longitudeParts = formatDdmParts(currentParsed.lon.value)
+      const latitudeParts = formatDdmParts(currentParsed.lat.value, 'lat')
+      const longitudeParts = formatDdmParts(currentParsed.lon.value, 'lon')
 
       return {
         ...current,
@@ -296,32 +316,28 @@ function App() {
           ddm: {
             latDegrees: latitudeParts.degrees,
             latMinutes: latitudeParts.minutes,
+            latHemisphere: latitudeParts.hemisphere,
             lonDegrees: longitudeParts.degrees,
             lonMinutes: longitudeParts.minutes,
+            lonHemisphere: longitudeParts.hemisphere,
           },
         },
       }
     })
   }
 
-  function handleCoordinatePaste(
-    event: ClipboardEvent<HTMLInputElement>,
+  function applyCoordinatePair(
     waypoint: WaypointKey,
-  ) {
-    const pair = parseCoordinatePair(event.clipboardData.getData('text'))
-    if (!pair) {
-      return
-    }
-
+    pair: { lat: string; lon: string },
+  ): boolean {
     const latitude = parseCoordinate(pair.lat, 'lat')
     const longitude = parseCoordinate(pair.lon, 'lon')
     if (!latitude.ok || !longitude.ok) {
-      return
+      return false
     }
 
-    event.preventDefault()
-    const latitudeParts = formatDdmParts(latitude.value)
-    const longitudeParts = formatDdmParts(longitude.value)
+    const latitudeParts = formatDdmParts(latitude.value, 'lat')
+    const longitudeParts = formatDdmParts(longitude.value, 'lon')
 
     setWaypoints((current) => ({
       ...current,
@@ -334,11 +350,62 @@ function App() {
         ddm: {
           latDegrees: latitudeParts.degrees,
           latMinutes: latitudeParts.minutes,
+          latHemisphere: latitudeParts.hemisphere,
           lonDegrees: longitudeParts.degrees,
           lonMinutes: longitudeParts.minutes,
+          lonHemisphere: longitudeParts.hemisphere,
         },
       },
     }))
+    return true
+  }
+
+  function handleCoordinatePaste(
+    event: ClipboardEvent<HTMLInputElement>,
+    waypoint: WaypointKey,
+  ) {
+    const pair = parseCoordinatePair(event.clipboardData.getData('text'))
+    if (!pair || !applyCoordinatePair(waypoint, pair)) {
+      return
+    }
+
+    event.preventDefault()
+  }
+
+  async function pasteFromGpxStudio(waypoint: WaypointKey) {
+    try {
+      const clipboardText = await navigator.clipboard.readText()
+      const result = parseGpxStudioCoordinatePair(clipboardText)
+
+      if (!result.ok) {
+        setPasteNotices((current) => ({
+          ...current,
+          [waypoint]: {
+            kind: 'error',
+            message: result.error,
+          },
+        }))
+        return
+      }
+
+      applyCoordinatePair(waypoint, result.pair)
+      setPasteNotices((current) => ({
+        ...current,
+        [waypoint]: {
+          kind: 'success',
+          message: 'DD coordinates pasted from gpx.studio.',
+        },
+      }))
+    } catch {
+      setPasteNotices((current) => ({
+        ...current,
+        [waypoint]: {
+          kind: 'error',
+          message:
+            'Clipboard access was blocked. Paste directly into a coordinate field instead.',
+        },
+      }))
+    }
   }
 
   function fieldError(
@@ -352,6 +419,7 @@ function App() {
   function resetSample() {
     setRouteName(SAMPLE_ROUTE.routeName)
     setWaypoints(cloneSampleWaypoints())
+    setPasteNotices({ start: null, end: null })
   }
 
   function handleDownload(event: FormEvent<HTMLFormElement>) {
@@ -395,51 +463,7 @@ function App() {
 
   return (
     <div className="site-shell">
-      <header className="site-header">
-        <div className="brand" aria-label="Tideline route builder">
-          <CompassMark />
-          <span className="brand__words">
-            <span className="brand__name">Tideline</span>
-            <span className="brand__tag">Route builder</span>
-          </span>
-        </div>
-        <div className="site-header__meta">
-          <span className="header-note">
-            <LockIcon />
-            Everything stays in your browser
-          </span>
-          <span className="version-badge">
-            GPX <strong>1.1</strong>
-          </span>
-        </div>
-      </header>
-
       <main>
-        <section className="intro" aria-labelledby="page-title">
-          <div className="intro__heading">
-            <p className="kicker">
-              <span className="kicker__line" aria-hidden="true" />
-              Coordinate → course
-            </p>
-            <h1 id="page-title">
-              Chart the <em>next drop.</em>
-            </h1>
-          </div>
-          <div className="intro__aside">
-            <p>
-              Turn two marks into an import-ready GPX route. Choose DD or DDM
-              for each waypoint—DDM is the default and splits degrees and
-              minutes into separate fields. Tideline converts to DD for the GPX
-              file.
-            </p>
-            <div className="intro__tags" aria-label="Supported input features">
-              <span>DDM default</span>
-              <span>Converts to DD</span>
-              <span>No upload</span>
-            </div>
-          </div>
-        </section>
-
         <div className="workspace">
           <form
             className="route-panel"
@@ -498,7 +522,7 @@ function App() {
               const heading = isStart ? 'Start waypoint' : 'End waypoint'
               const message =
                 draft.format === 'ddm'
-                  ? 'Use signed degrees and decimal minutes. A minus makes the coordinate south or west. Paste a full pair into any field to fill both.'
+                  ? 'Enter positive degrees and decimal minutes, then choose S or W for south or west. Paste a full pair into any field to fill both.'
                   : 'Use signed decimal degrees. Paste a full pair into either field to fill both.'
               const latError = fieldError(waypoint, 'lat')
               const lonError = fieldError(waypoint, 'lon')
@@ -506,6 +530,7 @@ function App() {
               const lonHintId = `${waypoint}-lon-hint`
               const latAxisId = `${waypoint}-lat-axis`
               const lonAxisId = `${waypoint}-lon-axis`
+              const notice = pasteNotices[waypoint]
 
               return (
                 <section
@@ -529,35 +554,56 @@ function App() {
                       </div>
                     </div>
 
-                    <div
-                      className="format-toggle"
-                      role="group"
-                      aria-label={`${heading} coordinate format`}
-                    >
+                    <div className="waypoint-actions">
+                      <div
+                        className="format-toggle"
+                        role="group"
+                        aria-label={`${heading} coordinate format`}
+                      >
+                        <button
+                          type="button"
+                          className={
+                            draft.format === 'dd' ? 'is-active' : undefined
+                          }
+                          aria-pressed={draft.format === 'dd'}
+                          onClick={() => changeFormat(waypoint, 'dd')}
+                          title="Decimal degrees"
+                        >
+                          DD
+                        </button>
+                        <button
+                          type="button"
+                          className={
+                            draft.format === 'ddm' ? 'is-active' : undefined
+                          }
+                          aria-pressed={draft.format === 'ddm'}
+                          onClick={() => changeFormat(waypoint, 'ddm')}
+                          title="Degrees and decimal minutes"
+                        >
+                          DDM
+                        </button>
+                      </div>
                       <button
                         type="button"
-                        className={
-                          draft.format === 'dd' ? 'is-active' : undefined
-                        }
-                        aria-pressed={draft.format === 'dd'}
-                        onClick={() => changeFormat(waypoint, 'dd')}
-                        title="Decimal degrees"
+                        className="paste-button"
+                        onClick={() => {
+                          void pasteFromGpxStudio(waypoint)
+                        }}
                       >
-                        DD
-                      </button>
-                      <button
-                        type="button"
-                        className={
-                          draft.format === 'ddm' ? 'is-active' : undefined
-                        }
-                        aria-pressed={draft.format === 'ddm'}
-                        onClick={() => changeFormat(waypoint, 'ddm')}
-                        title="Degrees and decimal minutes"
-                      >
-                        DDM
+                        <ClipboardIcon />
+                        Paste from gpx.studio
                       </button>
                     </div>
                   </div>
+
+                  {notice && (
+                    <p
+                      className={`paste-notice paste-notice--${notice.kind}`}
+                      role="status"
+                    >
+                      {notice.message}
+                    </p>
+                  )}
 
                   <div
                     className={`coordinate-grid${draft.format === 'ddm' ? ' coordinate-grid--ddm' : ''}`}
@@ -585,7 +631,7 @@ function App() {
                             onPaste={(event) =>
                               handleCoordinatePaste(event, waypoint)
                             }
-                            placeholder="-29.9357194"
+                            placeholder="-29.935797"
                             autoComplete="off"
                             spellCheck={false}
                             autoCapitalize="none"
@@ -629,7 +675,7 @@ function App() {
                             onPaste={(event) =>
                               handleCoordinatePaste(event, waypoint)
                             }
-                            placeholder="31.0096464"
+                            placeholder="31.009616"
                             autoComplete="off"
                             spellCheck={false}
                             autoCapitalize="none"
@@ -682,7 +728,7 @@ function App() {
                                 onPaste={(event) =>
                                   handleCoordinatePaste(event, waypoint)
                                 }
-                                placeholder="-29"
+                                placeholder="29"
                                 autoComplete="off"
                                 spellCheck={false}
                                 autoCapitalize="none"
@@ -718,10 +764,29 @@ function App() {
                                 aria-describedby={`${latHintId}${latError ? ` ${waypoint}-lat-error` : ''}`}
                               />
                             </label>
+                            <label className="ddm-part ddm-part--hemisphere">
+                              <span>N / S</span>
+                              <select
+                                id={`${waypoint}-lat-hemisphere`}
+                                name={`${waypoint}LatitudeHemisphere`}
+                                value={draft.ddm.latHemisphere}
+                                onChange={(event) =>
+                                  updateDdmHemisphere(
+                                    waypoint,
+                                    'lat',
+                                    event.target.value as Hemisphere,
+                                  )
+                                }
+                                aria-label={`${heading} latitude hemisphere`}
+                              >
+                                <option value="N">N</option>
+                                <option value="S">S</option>
+                              </select>
+                            </label>
                           </div>
                           <p className="sr-only" id={latHintId}>
-                            Latitude degrees and decimal minutes. Use a minus
-                            for south. {message}
+                            Latitude degrees and decimal minutes. Choose N or S
+                            for the hemisphere. {message}
                           </p>
                           {latError && (
                             <p
@@ -800,10 +865,29 @@ function App() {
                                 aria-describedby={`${lonHintId}${lonError ? ` ${waypoint}-lon-error` : ''}`}
                               />
                             </label>
+                            <label className="ddm-part ddm-part--hemisphere">
+                              <span>E / W</span>
+                              <select
+                                id={`${waypoint}-lon-hemisphere`}
+                                name={`${waypoint}LongitudeHemisphere`}
+                                value={draft.ddm.lonHemisphere}
+                                onChange={(event) =>
+                                  updateDdmHemisphere(
+                                    waypoint,
+                                    'lon',
+                                    event.target.value as Hemisphere,
+                                  )
+                                }
+                                aria-label={`${heading} longitude hemisphere`}
+                              >
+                                <option value="E">E</option>
+                                <option value="W">W</option>
+                              </select>
+                            </label>
                           </div>
                           <p className="sr-only" id={lonHintId}>
-                            Longitude degrees and decimal minutes. Use a minus
-                            for west. {message}
+                            Longitude degrees and decimal minutes. Choose E or W
+                            for the hemisphere. {message}
                           </p>
                           {lonError && (
                             <p
