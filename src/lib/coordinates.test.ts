@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
   formatDd,
+  formatDdmParts,
   parseCoordinate,
   parseCoordinatePair,
+  parseDdCoordinate,
+  parseDdmParts,
   parseWaypoint,
   type ParseResult,
 } from './coordinates'
@@ -189,5 +192,76 @@ describe('parseCoordinatePair', () => {
     expect(parseCoordinatePair('-29.865207, 999')).toBeNull()
     expect(parseCoordinatePair('north, east')).toBeNull()
     expect(parseCoordinatePair('-29.865207,')).toBeNull()
+  })
+})
+
+describe('explicit DD parsing', () => {
+  it('accepts only decimal degrees', () => {
+    expect(parseDdCoordinate('-29.9357194', 'lat')).toMatchObject({
+      ok: true,
+      value: -29.9357194,
+      format: 'dd',
+      decimals: 7,
+    })
+    expect(parseDdCoordinate('29 56.1432 S', 'lat').ok).toBe(false)
+    expect(parseDdCoordinate('29° 56.1432′ S', 'lat').ok).toBe(false)
+  })
+})
+
+describe('split DDM parsing', () => {
+  it('combines signed degrees and decimal minutes', () => {
+    expect(parseDdmParts('-29', '56.143164', 'lat')).toMatchObject({
+      ok: true,
+      value: expect.closeTo(-29.9357194, 9),
+      format: 'ddm',
+      decimals: 7,
+    })
+    expect(parseDdmParts('31', '0.578784', 'lon')).toMatchObject({
+      ok: true,
+      value: expect.closeTo(31.0096464, 9),
+      format: 'ddm',
+      decimals: 7,
+    })
+  })
+
+  it('uses a negative zero degree value to keep the hemisphere', () => {
+    expect(valueOf(parseDdmParts('-0', '30', 'lat'))).toBeCloseTo(-0.5, 10)
+    expect(valueOf(parseDdmParts('0', '30', 'lat'))).toBeCloseTo(0.5, 10)
+  })
+
+  it('rejects invalid degree and minute inputs', () => {
+    expect(parseDdmParts('29.5', '10', 'lat').ok).toBe(false)
+    expect(parseDdmParts('91', '0', 'lat').ok).toBe(false)
+    expect(parseDdmParts('-29', '60', 'lat').ok).toBe(false)
+    expect(parseDdmParts('', '10', 'lat').ok).toBe(false)
+    expect(parseDdmParts('29', '', 'lat').ok).toBe(false)
+  })
+})
+
+describe('split DDM formatting', () => {
+  it('converts decimal degrees into signed degrees and minutes', () => {
+    expect(formatDdmParts(-29.9357194)).toEqual({
+      degrees: '-29',
+      minutes: '56.143164',
+    })
+    expect(formatDdmParts(31.0096464)).toEqual({
+      degrees: '31',
+      minutes: '0.578784',
+    })
+    expect(formatDdmParts(-29.960267)).toEqual({
+      degrees: '-29',
+      minutes: '57.61602',
+    })
+    expect(formatDdmParts(31.0165)).toEqual({
+      degrees: '31',
+      minutes: '0.99',
+    })
+  })
+
+  it('preserves a negative sign for values below one degree', () => {
+    expect(formatDdmParts(-0.5)).toEqual({
+      degrees: '-0',
+      minutes: '30',
+    })
   })
 })

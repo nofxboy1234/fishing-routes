@@ -291,7 +291,8 @@ main {
   margin-bottom: 7px;
 }
 
-.field__topline label {
+.field__topline label,
+.field__axis {
   color: var(--ink);
   font-size: 9.5px;
   font-weight: 750;
@@ -307,22 +308,6 @@ main {
   font-weight: 450;
   line-height: 1.2;
   letter-spacing: 0.02em;
-}
-
-.field__meta--detected {
-  color: var(--success);
-  font-weight: 600;
-}
-
-.field__meta--detected::before {
-  content: '';
-  width: 4px;
-  height: 4px;
-  margin-right: 4px;
-  display: inline-block;
-  border-radius: 50%;
-  background: currentColor;
-  vertical-align: 1px;
 }
 
 .field input {
@@ -461,31 +446,45 @@ main {
   letter-spacing: -0.015em;
 }
 
-.auto-badge {
+.format-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
   flex: 0 0 auto;
-  padding: 5px 8px;
-  border: 1px solid rgba(8, 98, 136, 0.18);
-  border-radius: 999px;
-  background: rgba(151, 215, 255, 0.4);
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 7px;
-  font-weight: 550;
-  line-height: 1;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  white-space: nowrap;
+  padding: 3px;
+  border: 1px solid rgba(8, 98, 136, 0.12);
+  border-radius: 7px;
+  background: rgba(8, 98, 136, 0.09);
 }
 
-.auto-badge__dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--success);
-  box-shadow: 0 0 0 3px rgba(8, 98, 136, 0.1);
+.format-toggle button {
+  min-width: 37px;
+  height: 26px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.format-toggle button:hover {
+  color: var(--deep);
+}
+
+.format-toggle button.is-active {
+  background: var(--panel);
+  color: var(--deep);
+  box-shadow:
+    0 1px 4px rgba(8, 98, 136, 0.16),
+    0 0 0 1px rgba(8, 98, 136, 0.04);
 }
 
 .coordinate-grid {
@@ -493,6 +492,29 @@ main {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 11px;
+  align-items: start;
+}
+
+.ddm-inputs {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 8px;
+}
+
+.ddm-part {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ddm-part > span {
+  color: var(--muted);
+  font-size: 7.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
 }
 
 .waypoint-card .field input {
@@ -1197,11 +1219,6 @@ main {
   .waypoint-head {
     flex-wrap: wrap;
     gap: 10px;
-  }
-
-  .auto-badge {
-    padding: 4px 7px;
-    font-size: 6.5px;
   }
 
   .coordinate-grid {

@@ -1,9 +1,9 @@
 # Tideline — Fishing Route GPX Builder
 
 A small Vite + React app for turning two waypoints into a downloadable GPX 1.1
-route. Type a coordinate in **Decimal Degrees (DD)** or **Degrees and Decimal
-Minutes (DDM)** — the format is detected automatically for every field, so DD
-and DDM can be mixed freely.
+route. Each waypoint can use **Decimal Degrees (DD)** or **Degrees and Decimal
+Minutes (DDM)**. DDM is the default, with separate degree and minute fields.
+Coordinates are converted to DD in the background for the GPX file.
 
 ## Run locally
 
@@ -12,7 +12,7 @@ npm install
 npm run dev
 ```
 
-Open the URL printed by Vite (normally <http://localhost:5173>).
+Open the URL printed by Vite (normally <http://localhost:5173/fishing-routes/>).
 
 ### Scripts
 
@@ -26,25 +26,25 @@ Open the URL printed by Vite (normally <http://localhost:5173>).
 
 ## Coordinate formats
 
-Each latitude and longitude field detects its own format. There are no format
-switches to manage.
+Use the **DD / DDM** switch on each waypoint to choose its input format. DDM is
+selected by default.
 
-| Format | Latitude example        | Longitude example       |
-| ------ | ----------------------- | ----------------------- |
-| DD     | `-29.9357194`           | `31.0096464`            |
-| DDM    | `29° 56.1432′ S`        | `31° 00.5788′ E`        |
+| Format | Latitude entry                               | Longitude entry                             |
+| ------ | -------------------------------------------- | ------------------------------------------- |
+| DD     | `-29.9357194`                                | `31.0096464`                                |
+| DDM    | Degrees `-29`, minutes `56.143164`           | Degrees `31`, minutes `0.578784`            |
 
-DDM also accepts a leading hemisphere (`S 29 56.1432`), signed degrees
-(`-29 56.1432`), or compact notation (`29°56.1432′S`). South and west
-coordinates are always converted to negative decimal degrees.
+In DDM mode, degrees and minutes have their own fields—no degree or minute
+symbols are needed. Make the degrees negative for south or west. Switching
+between DD and DDM converts the values already entered.
 
-To fill both fields at once, paste a latitude/longitude pair such as
-`-29.865207, 31.064148` into either the latitude or longitude field. Parentheses
-and DDM pairs are supported too.
+To fill both latitude and longitude at once, paste a coordinate pair such as
+`-29.865207, 31.064148` into any coordinate field. Parentheses and DDM pairs are
+supported too.
 
-Both values are validated against their geographic range and normalized to
-standard decimal degrees. Six decimal places are used as the minimum output
-precision, and extra precision from the input is preserved—for example, the
+All coordinates are validated against their geographic range and converted to
+standard decimal degrees for the GPX file. Six decimal places are used as the
+minimum output precision, and extra precision is preserved—for example, the
 default start coordinates are written as `-29.9357194` and `31.0096464`.
 
 ## GPX output
@@ -60,5 +60,5 @@ The downloaded `.gpx` file follows the supplied Apexmove template:
 The filename is a URL-safe slug of the route name, for example
 `Fishing Spot Route` → `fishing-spot-route.gpx`.
 
-All parsing, conversion, preview generation, and downloading happen in the
-browser. No data is sent to a server.
+All parsing, conversion, route preview, and downloading happen in the browser.
+No data is sent to a server.

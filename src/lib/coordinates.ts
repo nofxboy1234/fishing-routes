@@ -97,16 +97,95 @@ export function parseCoordinate(raw: string, axis: Axis): ParseResult {
   }
 
   const normalized = text.replace(',', '.')
+
   if (DECIMAL_RE.test(normalized)) {
-    return validateRange(
-      Number(normalized),
-      axis,
-      'dd',
-      Math.max(MIN_DECIMALS, countDecimalPlaces(normalized)),
-    )
+    return parseDdCoordinate(text, axis)
   }
 
   return parseDdm(text, axis)
+}
+
+export function parseDdCoordinate(raw: string, axis: Axis): ParseResult {
+  const config = AXIS_CONFIG[axis]
+  const text = raw.trim()
+
+  if (!text) {
+    return fail(`Enter a ${config.label.toLowerCase()}.`)
+  }
+
+  const normalized = text.replace(',', '.')
+  if (!DECIMAL_RE.test(normalized)) {
+    return fail(`Use decimal degrees, like ${config.ddExample}.`)
+  }
+
+  return validateRange(
+    Number(normalized),
+    axis,
+    'dd',
+    Math.max(MIN_DECIMALS, countDecimalPlaces(normalized)),
+  )
+}
+
+function ddmDecimals(minutePart: string): number {
+  return Math.min(
+    MAX_DECIMALS,
+    Math.max(MIN_DECIMALS, countDecimalPlaces(minutePart) + 1),
+  )
+}
+
+export function parseDdmParts(
+  degreesRaw: string,
+  minutesRaw: string,
+  axis: Axis,
+): ParseResult {
+  const config = AXIS_CONFIG[axis]
+  const degreeText = degreesRaw.trim()
+  const minuteText = minutesRaw.trim()
+
+  if (!degreeText) {
+    return fail(`Enter ${config.label.toLowerCase()} degrees.`)
+  }
+
+  if (!/^[+-]?\d+$/.test(degreeText)) {
+    return fail('Degrees must be a whole number.')
+  }
+
+  if (!minuteText) {
+    return fail('Enter minutes.')
+  }
+
+  if (!NUMBER_RE.test(minuteText)) {
+    return fail('Minutes must be a number.')
+  }
+
+  const degrees = Number(degreeText)
+  const minutes = Number(minuteText)
+
+  if (Math.abs(degrees) > config.max) {
+    return fail(
+      `${config.label} degrees must be between -${config.max} and ${config.max}.`,
+    )
+  }
+
+  if (minutes < 0 || minutes >= 60) {
+    return fail('Minutes must be at least 0 and less than 60.')
+  }
+
+  const value = Math.abs(degrees) + minutes / 60
+  if (value > config.max) {
+    return fail(
+      `${config.label} must be between -${config.max} and ${config.max}.`,
+    )
+  }
+
+  const negative = degreeText.startsWith('-')
+
+  return {
+    ok: true,
+    value: normalizeZero(negative ? -value : value),
+    format: 'ddm',
+    decimals: ddmDecimals(minuteText),
+  }
 }
 
 function parseDdm(raw: string, axis: Axis): ParseResult {
@@ -197,7 +276,7 @@ function parseDdm(raw: string, axis: Axis): ParseResult {
     ok: true,
     value: normalizeZero(negative ? -value : value),
     format: 'ddm',
-    decimals: clampDecimals(6 + Math.max(0, countDecimalPlaces(minutePart) - 4)),
+    decimals: ddmDecimals(minutePart),
   }
 }
 
@@ -207,6 +286,27 @@ function parseDdm(raw: string, axis: Axis): ParseResult {
  */
 export function formatDd(value: number, decimals = MIN_DECIMALS): string {
   return normalizeZero(value).toFixed(clampDecimals(decimals))
+}
+
+export function formatDdmParts(value: number): {
+  degrees: string
+  minutes: string
+} {
+  const absolute = Math.abs(value)
+  let degrees = Math.floor(absolute)
+  let minutes = Math.round((absolute - degrees) * 60 * 1_000_000) / 1_000_000
+
+  if (minutes >= 60) {
+    degrees += 1
+    minutes = 0
+  }
+
+  const minuteText =
+    minutes.toFixed(6).replace(/0+$/, '').replace(/\.$/, '') || '0'
+  const degreeText =
+    value < 0 && degrees === 0 ? '-0' : String(value < 0 ? -degrees : degrees)
+
+  return { degrees: degreeText, minutes: minuteText }
 }
 
 export function parseWaypoint(
